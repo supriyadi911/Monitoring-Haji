@@ -1,773 +1,748 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Monitoring Jamaah Haji</title>
-  
-  <!-- CSS: Bootstrap 5, DataTables, FontAwesome -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-  <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  
-  <style>
-    body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .hero { background: linear-gradient(135deg, #0f5132 0%, #198754 100%); color: white; padding: 60px 0; border-radius: 0 0 30px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-    .stat-card { border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.3s; }
-    .stat-card:hover { transform: translateY(-5px); }
-    .stat-icon { font-size: 2.5rem; opacity: 0.8; }
-    .nav-brand-text { font-weight: bold; color: #0f5132 !important; }
-    .form-container { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Monitoring Jemaah Haji</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (Excel Export/Import) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    /* Perbaikan tampilan input */
-    .input-group-text { border-color: #dee2e6; }
-    .form-control:focus { box-shadow: none; border-color: #198754; }
-    .input-group:focus-within .input-group-text, .input-group:focus-within .form-control { border-color: #198754; }
-    
-    #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; justify-content: center; align-items: center; }
-    .table-stat-karom th { background-color: #e8f5e9; color: #0f5132; }
-    .chart-container { position: relative; height: 220px; width: 100%; display: flex; justify-content: center; align-items: center;}
-    
-    /* NAVIGASI BAWAH KHUSUS MOBILE */
-    .mobile-bottom-nav {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #ffffff;
-      box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
-      z-index: 1030;
-      justify-content: space-around;
-      align-items: center;
-      padding: 8px 0;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-    }
-    .nav-item-bottom {
-      text-align: center;
-      color: #6c757d;
-      text-decoration: none;
-      font-size: 0.75rem;
-      flex: 1;
-      padding: 5px 0;
-      transition: all 0.3s ease;
-    }
-    .nav-item-bottom i { display: block; font-size: 1.4rem; margin-bottom: 3px; }
-    .nav-item-bottom.active { color: #198754; font-weight: bold; }
-    .nav-item-bottom:hover { color: #0f5132; }
-    
-    /* STATUS KONEKSI (TITIK BERKEDIP) */
-    .pulsing-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7); } 
-      70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(25, 135, 84, 0); } 
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); } 
-    }
-    .bg-offline { background-color: #dc3545 !important; animation: none; box-shadow: none; }
-    
-    /* MEDIA QUERIES UNTUK RESPONSIVITAS */
-    @media (max-width: 767px) {
-      body { padding-bottom: 75px; } /* Ruang untuk navbar bawah */
-      .mobile-bottom-nav { display: flex; }
-      .navbar-top-controls { display: none !important; } /* Sembunyikan kontrol atas di HP */
-      .hero { padding: 40px 0; border-radius: 0 0 20px 20px; }
-      .hero h1 { font-size: 1.8rem; }
-      .app-section.container-fluid { padding-left: 10px !important; padding-right: 10px !important; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Loading Overlay -->
-  <div id="loader">
-    <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
-      <span class="visually-hidden">Memuat...</span>
-    </div>
-  </div>
-
-  <!-- Navbar Atas (Desktop/Tablet) -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-    <div class="container d-flex justify-content-between align-items-center">
-      <a class="navbar-brand nav-brand-text" href="#" onclick="goHome()"><i class="fas fa-kaaba text-success me-2"></i>MonHaji</a>
-      
-      <div class="d-flex align-items-center">
-        <!-- Indikator Status Koneksi (Publik) -->
-        <div class="me-3 d-flex align-items-center bg-light px-2 py-1 rounded-pill border" title="Status Database">
-          <span class="pulsing-dot bg-success me-2" id="conn-dot"></span>
-          <small class="text-muted fw-bold" style="font-size: 0.75rem;" id="conn-text">Online</small>
-        </div>
-
-        <!-- Kontrol ini disembunyikan di layar HP -->
-        <div class="d-flex align-items-center navbar-top-controls">
-          <span id="user-info" class="me-3 fw-bold text-success d-none"></span>
-          <button id="btn-login-nav" class="btn btn-outline-success btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#loginModal"><i class="fas fa-sign-in-alt me-1"></i> Login</button>
-          <button id="btn-logout-nav" class="btn btn-danger btn-sm rounded-pill px-3 d-none" onclick="logout()"><i class="fas fa-sign-out-alt me-1"></i> Logout</button>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <!-- BAGIAN 1: LANDING PAGE -->
-  <div id="section-landing" class="app-section">
-    <div class="hero text-center mb-5">
-      <div class="container px-3">
-        <!-- ID ditambahkan agar Judul bisa diubah via pengaturan -->
-        <h1 id="app-main-title" class="display-5 fw-bold mb-3"><i class="fas fa-satellite-dish me-2"></i>Sistem Monitoring Jamaah</h1>
-        <p id="app-sub-title" class="lead mb-4 fs-6 fs-md-5">Aplikasi pelaporan kondisi jamaah, kesehatan, dan kehadiran harian secara real-time oleh Kepala Rombongan (KAROM).</p>
-        <button class="btn btn-light btn-lg text-success fw-bold px-4 rounded-pill shadow" data-bs-toggle="modal" data-bs-target="#loginModal">
-          <i class="fas fa-paper-plane me-2"></i>Mulai Laporan
-        </button>
-      </div>
-    </div>
-
-    <div class="container px-3">
-      <h4 class="text-center mb-4 fw-bold text-secondary">Ringkasan Keseluruhan</h4>
-      <!-- Kartu ringkasan -->
-      <div class="row g-3 g-md-4">
-        <div class="col-6 col-md-3">
-          <div class="card stat-card bg-success text-white h-100">
-            <div class="card-body p-3 p-md-4 d-flex justify-content-between align-items-center flex-column flex-md-row text-center text-md-start">
-              <div><h6 class="card-title mb-1 fs-7">Jamaah Sehat</h6><h2 class="mt-1 mb-0 fw-bold" id="stat-sehat">0</h2></div>
-              <i class="fas fa-heartbeat stat-icon mt-2 mt-md-0 d-none d-md-block"></i>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="card stat-card bg-danger text-white h-100">
-            <div class="card-body p-3 p-md-4 d-flex justify-content-between align-items-center flex-column flex-md-row text-center text-md-start">
-              <div><h6 class="card-title mb-1 fs-7">Jamaah Sakit</h6><h2 class="mt-1 mb-0 fw-bold" id="stat-sakit">0</h2></div>
-              <i class="fas fa-briefcase-medical stat-icon mt-2 mt-md-0 d-none d-md-block"></i>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="card stat-card bg-warning text-dark h-100">
-            <div class="card-body p-3 p-md-4 d-flex justify-content-between align-items-center flex-column flex-md-row text-center text-md-start">
-              <div><h6 class="card-title mb-1 fs-7">Resiko (Resti)</h6><h2 class="mt-1 mb-0 fw-bold" id="stat-resti">0</h2></div>
-              <i class="fas fa-wheelchair stat-icon mt-2 mt-md-0 d-none d-md-block"></i>
-            </div>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="card stat-card bg-info text-white h-100">
-            <div class="card-body p-3 p-md-4 d-flex justify-content-between align-items-center flex-column flex-md-row text-center text-md-start">
-              <div><h6 class="card-title mb-1 fs-7">Laporan Hari Ini</h6><h2 class="mt-1 mb-0 fw-bold" id="stat-hariini">0</h2></div>
-              <i class="fas fa-calendar-check stat-icon mt-2 mt-md-0 d-none d-md-block"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BAGIAN 2: DASHBOARD KAROM (FORM INPUT) -->
-  <div id="section-karom" class="app-section container mt-4 mt-md-5 d-none">
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="form-container border-top border-success border-5">
-          <h4 class="mb-4 text-center fw-bold text-success"><i class="fas fa-clipboard-list me-2"></i>Form Laporan Jamaah</h4>
-          <form id="formLaporan">
-            <div class="row mb-3">
-              <div class="col-md-6 mb-3 mb-md-0"><label class="form-label fw-bold">Nama Jamaah</label><input type="text" class="form-control" name="nama" required placeholder="Masukkan nama lengkap"></div>
-              <div class="col-md-6"><label class="form-label fw-bold">No Porsi / KTP</label><input type="text" class="form-control" name="noporsi" required placeholder="Nomor Porsi/KTP"></div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-md-6 mb-3 mb-md-0"><label class="form-label fw-bold">Usia (Tahun)</label><input type="number" class="form-control" name="usia" required placeholder="Contoh: 65"></div>
-              <div class="col-md-6"><label class="form-label fw-bold">Kehadiran</label>
-                <select class="form-select" name="kehadiran" required>
-                  <option value="" selected disabled>-- Pilih Status --</option>
-                  <option value="Hadir">Hadir</option><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-md-6 mb-3 mb-md-0"><label class="form-label fw-bold">Kesehatan</label>
-                <select class="form-select" name="kesehatan" required>
-                  <option value="" selected disabled>-- Pilih Kondisi --</option>
-                  <option value="Sehat">Sehat</option><option value="Sakit Ringan">Sakit Ringan</option><option value="Sakit Berat">Sakit Berat</option><option value="Dirujuk">Dirujuk (RS)</option>
-                </select>
-              </div>
-              <div class="col-md-6"><label class="form-label fw-bold">Resiko Khusus</label>
-                <select class="form-select" name="resiko" required>
-                  <option value="Tidak Ada">Tidak Ada</option><option value="Lansia">Lansia (>65 Thn)</option><option value="Resti">Resiko Tinggi (Resti)</option><option value="Kursi Roda">Butuh Kursi Roda</option><option value="Demensia">Demensia/Pikun</option>
-                </select>
-              </div>
-            </div>
-            <div class="mb-4"><label class="form-label fw-bold">Catatan KAROM</label><textarea class="form-control" name="catatan" rows="3" placeholder="Keluhan spesifik atau tindakan yang telah diambil..."></textarea></div>
-            <div class="d-grid"><button type="submit" class="btn btn-success btn-lg rounded-pill"><i class="fas fa-paper-plane me-2"></i>Kirim Laporan</button></div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BAGIAN 3: DASHBOARD PANITIA / ADMIN -->
-  <div id="section-admin" class="app-section container-fluid mt-4 px-2 px-md-4 d-none">
-    
-    <!-- Header Admin dengan Toggle Auto Refresh -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-      <h4 class="fw-bold text-success m-0"><i class="fas fa-server me-2"></i>Dashboard Admin</h4>
-      <div class="d-flex align-items-center gap-3 bg-white p-2 rounded-pill shadow-sm border">
-        <!-- Toggle Auto Refresh -->
-        <div class="form-check form-switch m-0 d-flex align-items-center">
-          <input class="form-check-input mt-0 me-2" type="checkbox" role="switch" id="toggleAutoRefresh" style="cursor: pointer;">
-          <label class="form-check-label small fw-bold text-secondary mb-0" for="toggleAutoRefresh" style="cursor: pointer;">Auto-Refresh</label>
-        </div>
-        <div class="vr"></div>
-        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="loadTableData()"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
-      </div>
-    </div>
-
-    <!-- PENGATURAN APLIKASI (Admin Only) -->
-    <div class="card shadow-sm border-0 rounded-4 mb-4">
-      <div class="card-header bg-white border-bottom border-primary border-3 pt-3 pb-2 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapsePengaturan" role="button" aria-expanded="false" style="cursor:pointer;">
-        <h6 class="mb-0 fw-bold text-primary"><i class="fas fa-cog me-2"></i>Pengaturan Aplikasi</h6>
-        <i class="fas fa-chevron-down text-primary"></i>
-      </div>
-      <div class="collapse" id="collapsePengaturan">
-        <div class="card-body p-3 p-md-4 bg-light rounded-bottom-4">
-          <form id="formPengaturan">
-            <div class="row mb-3">
-              <div class="col-md-6 mb-3 mb-md-0">
-                <label class="form-label small fw-bold">Judul Aplikasi</label>
-                <input type="text" class="form-control bg-white" id="setJudul" value="Sistem Monitoring Jamaah" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold">Sub Judul / Deskripsi</label>
-                <input type="text" class="form-control bg-white" id="setSubJudul" value="Aplikasi pelaporan kondisi jamaah, kesehatan, dan kehadiran harian secara real-time oleh Kepala Rombongan (KAROM)." required>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-bold">URL Database (Spreadsheet Aplikasi)</label>
-              <input type="url" class="form-control bg-white" id="setWebAppUrl" value="https://script.google.com/macros/s/AKfycby3Q2b-Mf6ukm5ggCVYnwKkOv7Qn2nPCGjspccUOaQe7HtkzQZImF23P1nkmfneQp2t/exec" placeholder="Paste URL Spreadsheet tujuan di sini">
-              <div class="form-text small">Kosongkan jika ingin menggunakan database bawaan. Pastikan akun pembuat aplikasi memiliki akses ke link spreadsheet tersebut.</div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill"><i class="fas fa-save me-1"></i> Simpan Tampilan & Koneksi</button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- GRAFIK & PERSENTASE STATISTIK -->
-    <div class="row g-3 mb-4">
-      <!-- Pie Chart Kesehatan -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card shadow-sm h-100 border-0 rounded-4">
-          <div class="card-header bg-white border-0 pt-3 text-center"><h6 class="fw-bold text-secondary mb-0">Statistik Kesehatan</h6></div>
-          <div class="card-body p-2"><div class="chart-container"><canvas id="chartKesehatan"></canvas></div></div>
-        </div>
-      </div>
-      <!-- Doughnut Chart Kehadiran -->
-      <div class="col-lg-4 col-md-6">
-        <div class="card shadow-sm h-100 border-0 rounded-4">
-          <div class="card-header bg-white border-0 pt-3 text-center"><h6 class="fw-bold text-secondary mb-0">Tingkat Kehadiran</h6></div>
-          <div class="card-body p-2"><div class="chart-container"><canvas id="chartKehadiran"></canvas></div></div>
-        </div>
-      </div>
-      <!-- Kartu Persentase -->
-      <div class="col-lg-4 col-md-12">
-        <div class="row g-2 h-100">
-          <div class="col-6"><div class="card bg-success text-white h-100 d-flex justify-content-center align-items-center p-3 rounded-4 border-0 shadow-sm"><i class="fas fa-heartbeat fs-3 opacity-50 mb-1"></i><h3 id="pct-sehat" class="mb-0 fw-bold">0%</h3><small class="fw-bold">Sehat</small></div></div>
-          <div class="col-6"><div class="card bg-danger text-white h-100 d-flex justify-content-center align-items-center p-3 rounded-4 border-0 shadow-sm"><i class="fas fa-procedures fs-3 opacity-50 mb-1"></i><h3 id="pct-sakit" class="mb-0 fw-bold">0%</h3><small class="fw-bold">Sakit/Dirujuk</small></div></div>
-          <div class="col-6"><div class="card bg-primary text-white h-100 d-flex justify-content-center align-items-center p-3 rounded-4 border-0 shadow-sm"><i class="fas fa-users fs-3 opacity-50 mb-1"></i><h3 id="pct-hadir" class="mb-0 fw-bold">0%</h3><small class="fw-bold">Hadir</small></div></div>
-          <div class="col-6"><div class="card bg-warning text-dark h-100 d-flex justify-content-center align-items-center p-3 rounded-4 border-0 shadow-sm"><i class="fas fa-wheelchair fs-3 opacity-50 mb-1"></i><h3 id="pct-resti" class="mb-0 fw-bold">0%</h3><small class="fw-bold">Resti/Lansia</small></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TABEL STATISTIK PER KAROM -->
-    <div class="card shadow-sm border-0 rounded-4 mb-4">
-      <div class="card-header bg-white border-bottom border-success border-3 pt-3 pb-2"><h6 class="mb-0 fw-bold text-success"><i class="fas fa-list-ol me-2"></i>Rekap per Rombongan (KAROM)</h6></div>
-      <div class="card-body p-2 p-md-3">
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover text-center align-middle table-stat-karom mb-0" style="font-size: 0.85rem;">
-            <thead>
-              <tr><th rowspan="2" class="align-middle text-start">Pelapor</th><th rowspan="2" class="align-middle">Total</th><th colspan="3" class="border-start border-end">Kehadiran</th><th colspan="3" class="border-end">Kesehatan</th><th rowspan="2" class="align-middle">Berisiko</th></tr>
-              <tr><th class="border-start">Hadir</th><th>Sakit</th><th class="border-end">Lain</th><th>Sehat</th><th>Sakit</th><th class="border-end">RS</th></tr>
-            </thead>
-            <tbody id="tbodyStatKarom"><tr><td colspan="9" class="text-muted">Memuat statistik...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    
-    <!-- TABEL DATA UTAMA -->
-    <div class="card shadow-sm border-0 rounded-4 mb-5">
-      <div class="card-body p-3 p-md-4">
-        <!-- Toolbar Tabel -->
-        <div class="mb-3 d-flex flex-column flex-md-row justify-content-between gap-2">
-          <button class="btn btn-danger btn-sm rounded-pill w-100 w-md-auto" onclick="deleteSelected()"><i class="fas fa-trash-alt me-1"></i>Hapus Pilihan</button>
-          
-          <div class="d-flex gap-2 w-100 w-md-auto">
-            <select id="filterKesehatan" class="form-select form-select-sm rounded-pill w-50 w-md-auto"><option value="">Semua Kesehatan</option><option value="Sehat">Sehat</option><option value="Sakit">Sakit</option><option value="Dirujuk">Dirujuk</option></select>
-            <select id="filterKehadiran" class="form-select form-select-sm rounded-pill w-50 w-md-auto"><option value="">Semua Kehadiran</option><option value="Hadir">Hadir</option><option value="Sakit">Sakit</option></select>
-          </div>
-        </div>
-
-        <!-- Tabel Laporan -->
-        <div class="table-responsive">
-          <table id="tabelLaporan" class="table table-striped table-hover w-100 align-middle" style="font-size: 0.9rem;">
-            <thead class="table-success">
-              <tr>
-                <th class="text-center" style="width: 30px;"><input type="checkbox" class="form-check-input" id="checkAll"></th>
-                <th>Waktu</th><th>Nama</th><th>Porsi</th><th>Hadir</th><th>Sehat</th><th>Resiko</th><th>Catatan</th><th>KAROM</th><th class="text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- NAVIGASI BAWAH (STICKY BOTTOM) KHUSUS HP -->
-  <nav class="mobile-bottom-nav">
-    <a href="#" class="nav-item-bottom active" id="bnav-home" onclick="navBottomClick('home')"><i class="fas fa-home"></i><span>Beranda</span></a>
-    <a href="#" class="nav-item-bottom d-none" id="bnav-form" onclick="navBottomClick('form')"><i class="fas fa-clipboard-list"></i><span>Lapor</span></a>
-    <a href="#" class="nav-item-bottom d-none" id="bnav-admin" onclick="navBottomClick('admin')"><i class="fas fa-server"></i><span>Admin</span></a>
-    <a href="#" class="nav-item-bottom" id="bnav-login" data-bs-toggle="modal" data-bs-target="#loginModal" onclick="setActiveBnav('bnav-login')"><i class="fas fa-sign-in-alt"></i><span>Login</span></a>
-    <a href="#" class="nav-item-bottom text-danger d-none" id="bnav-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
-  </nav>
-
-  <!-- MODAL LOGIN -->
-  <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content rounded-4 border-0 shadow">
-        <div class="modal-header border-0 pb-0 text-center d-block">
-          <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
-          <div class="text-success mb-2"><i class="fas fa-user-circle fa-4x"></i></div>
-          <h5 class="modal-title fw-bold">Login Sistem</h5>
-        </div>
-        <div class="modal-body p-4">
-          <form id="formLogin">
-            <div class="mb-3">
-              <label class="form-label fw-bold small">Username</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light"><i class="fas fa-user text-secondary"></i></span>
-                <input type="text" class="form-control border-start-0" name="username" required placeholder="Masukkan username">
-              </div>
-            </div>
-            <div class="mb-4">
-              <label class="form-label fw-bold small">Password</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light"><i class="fas fa-lock text-secondary"></i></span>
-                <input type="password" class="form-control border-end-0" id="loginPassword" name="password" required placeholder="Masukkan password">
-                <span class="input-group-text bg-white border-start-0" style="cursor: pointer;" onclick="togglePassword('loginPassword', 'toggleLoginPassword')">
-                  <i class="fas fa-eye text-secondary" id="toggleLoginPassword"></i>
-                </span>
-              </div>
-            </div>
-            <button type="submit" class="btn btn-success w-100 fw-bold mb-2 rounded-pill py-2">Masuk</button>
-            <div class="text-center mb-3">
-              <small class="text-muted d-block">
-                <strong>Akun Demo Admin:</strong> admin / admin123<br>
-                <strong>Akun Demo KAROM:</strong> karom / karom123
-              </small>
-            </div>
-            <div class="text-center border-top pt-3">
-              <small class="text-muted">Belum terdaftar? <a href="#" class="text-success text-decoration-none fw-bold" onclick="showRegisterModal()">Daftar di sini</a></small>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL REGISTER KAROM -->
-  <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content rounded-4 border-0 shadow">
-        <div class="modal-header bg-success text-white rounded-top-4">
-          <h6 class="modal-title fw-bold"><i class="fas fa-user-plus me-2"></i>Daftar KAROM</h6>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <form id="formRegister">
-            <div class="mb-3"><label class="form-label small fw-bold">Nama Lengkap</label><input type="text" class="form-control" name="nama" required></div>
-            <div class="mb-3"><label class="form-label small fw-bold">Rombongan</label><input type="text" class="form-control" name="rombongan" required placeholder="Cth: Rombongan 1 / KBIH X"></div>
-            <div class="mb-3"><label class="form-label small fw-bold">Username</label><input type="text" class="form-control" name="username" required></div>
-            <div class="mb-4">
-              <label class="form-label small fw-bold">Password</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light"><i class="fas fa-lock text-secondary"></i></span>
-                <input type="password" class="form-control border-end-0" id="regPassword" name="password" required placeholder="Buat password">
-                <span class="input-group-text bg-white border-start-0" style="cursor: pointer;" onclick="togglePassword('regPassword', 'toggleRegPassword')">
-                  <i class="fas fa-eye text-secondary" id="toggleRegPassword"></i>
-                </span>
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill py-2">Daftar Sekarang</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL EDIT LAPORAN -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-warning"><h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Edit Data</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body p-3">
-          <form id="formEdit">
-            <input type="hidden" name="id" id="editId">
-            <div class="row mb-2">
-              <div class="col-6"><label class="form-label small">Nama</label><input type="text" class="form-control form-control-sm" name="nama" id="editNama" required></div>
-              <div class="col-6"><label class="form-label small">Porsi</label><input type="text" class="form-control form-control-sm" name="noporsi" id="editPorsi" required></div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-4"><label class="form-label small">Usia</label><input type="number" class="form-control form-control-sm" name="usia" id="editUsia" required></div>
-              <div class="col-4"><label class="form-label small">Hadir</label><select class="form-select form-select-sm" name="kehadiran" id="editKehadiran"><option value="Hadir">Hadir</option><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Lainnya">Lainnya</option></select></div>
-              <div class="col-4"><label class="form-label small">Sehat</label><select class="form-select form-select-sm" name="kesehatan" id="editKesehatan"><option value="Sehat">Sehat</option><option value="Sakit Ringan">Skt Ringan</option><option value="Sakit Berat">Skt Berat</option><option value="Dirujuk">RS</option></select></div>
-            </div>
-            <div class="mb-2"><label class="form-label small">Resiko</label><select class="form-select form-select-sm" name="resiko" id="editResiko"><option value="Tidak Ada">Tidak Ada</option><option value="Lansia">Lansia</option><option value="Resti">Resti</option><option value="Kursi Roda">Kursi Roda</option></select></div>
-            <div class="mb-3"><label class="form-label small">Catatan</label><textarea class="form-control form-control-sm" name="catatan" id="editCatatan" rows="2"></textarea></div>
-            <div class="d-flex justify-content-end"><button type="submit" class="btn btn-success btn-sm px-3 rounded-pill">Simpan</button></div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT LIBRARIES -->
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-  <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- CUSTOM APP LOGIC -->
-  <script>
-    // --- SAFEGUARD PREVIEW ENVIRONMENT ---
-    // Mencegah error "ReferenceError: google is not defined" saat dijalankan di luar Google Apps Script (misal: mode Preview).
-    if (typeof window.google === 'undefined') {
-      window.google = {
-        script: {
-          run: {
-            withSuccessHandler: function(cb) { this.successCb = cb; return this; },
-            withFailureHandler: function(cb) { this.failureCb = cb; return this; }
-          }
-        }
-      };
-      const methods = ['getAppSettings', 'getDashboardStats', 'getAllLaporan', 'loginUser', 'saveAppSettings', 'submitLaporan', 'updateLaporan', 'deleteLaporanBulk', 'registerKarom'];
-      methods.forEach(method => {
-        window.google.script.run[method] = function(...args) {
-          setTimeout(() => {
-            if (this.successCb) {
-              if (method === 'getAppSettings') this.successCb({ judul: 'Sistem Monitoring Jamaah', subJudul: 'Aplikasi pelaporan kondisi jamaah...', databaseUrl: 'https://script.google.com/macros/s/AKfycby3Q2b-Mf6ukm5ggCVYnwKkOv7Qn2nPCGjspccUOaQe7HtkzQZImF23P1nkmfneQp2t/exec' });
-              else if (method === 'getDashboardStats') this.successCb({ sehat: 0, sakit: 0, resti: 0, hariIni: 0 });
-              else if (method === 'getAllLaporan') this.successCb([]);
-              else if (method === 'loginUser') {
-                  const user = args[0]; const pass = args[1];
-                  if(user === 'admin' && pass === 'admin123') this.successCb({ status: 'success', nama: 'Admin Pusat', role: 'Admin', rombongan: 'Pusat' });
-                  else if(user === 'karom' && pass === 'karom123') this.successCb({ status: 'success', nama: 'Budi (KAROM)', role: 'KAROM', rombongan: 'Rombongan 1' });
-                  else this.successCb({ status: 'error', message: 'Username atau Password salah!' });
-              }
-              else this.successCb({ status: 'success', message: 'Tindakan berhasil! (Mode Simulasi Preview)' });
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#059669', secondary: '#10b981', dark: '#1f2937'
+                    }
+                }
             }
-          }, 100);
-          return this;
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .modal-active { display: flex !important; }
+        .tab-active { border-bottom: 2px solid #059669; color: #059669; font-weight: 600; }
+        [x-cloak] { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-kaaba text-primary text-2xl mr-3"></i>
+                    <span class="font-bold text-xl text-dark">HajiMon</span>
+                </div>
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <div class="hidden md:flex space-x-2 mr-2">
+                        <button id="navHome" class="nav-link text-primary px-3 py-2 rounded-md font-medium transition" onclick="switchPage('landing')">Beranda</button>
+                        <button id="navKarom" class="nav-link hidden text-gray-600 hover:text-primary px-3 py-2 rounded-md font-medium transition" onclick="switchPage('formKarom')">Lapor Jamaah</button>
+                        <button id="navPanitia" class="nav-link hidden text-gray-600 hover:text-primary px-3 py-2 rounded-md font-medium transition" onclick="switchPage('panitiaDash')">Dashboard Panitia</button>
+                    </div>
+                    
+                    <button id="btnLoginMain" class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-md text-sm font-medium transition" onclick="openLoginModal()">Login</button>
+                    
+                    <div id="userProfile" class="hidden items-center space-x-3">
+                        <span id="userNameDisplay" class="text-sm font-semibold text-gray-700 hidden sm:inline-block"></span>
+                        <span class="sm:hidden text-sm font-semibold text-primary"><i class="fas fa-user-circle text-xl mt-1"></i></span>
+                        <button class="text-red-500 hover:text-red-700 p-2" onclick="logout()" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
+        
+        <!-- ================= BAGIAN 1: LANDING PAGE & DASHBOARD UTAMA ================= -->
+        <section id="page-landing" class="block animate-fade-in space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12 text-center flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 text-left mb-6 md:mb-0">
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Sistem Monitoring Terpadu Jemaah Haji</h1>
+                    <p class="text-gray-600 text-lg mb-6">Membantu Panitia dan Ketua Rombongan (KAROM) dalam melacak kehadiran, kondisi kesehatan, dan resiko khusus jemaah secara real-time.</p>
+                    <button class="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg font-medium shadow-md transition" onclick="openLoginModal()">Mulai Gunakan</button>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="w-64 h-64 bg-emerald-50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-users text-6xl text-primary opacity-80"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistik Publik -->
+            <div>
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Ringkasan Laporan Terkini</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                        <div class="bg-blue-100 p-4 rounded-lg text-blue-600 mr-4"><i class="fas fa-users text-xl"></i></div>
+                        <div><p class="text-sm text-gray-500 font-medium">Total Jemaah Dilapor</p><p class="text-2xl font-bold text-gray-800" id="statPublicTotal">0</p></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                        <div class="bg-green-100 p-4 rounded-lg text-green-600 mr-4"><i class="fas fa-heartbeat text-xl"></i></div>
+                        <div><p class="text-sm text-gray-500 font-medium">Kondisi Sehat</p><p class="text-2xl font-bold text-gray-800" id="statPublicSehat">0</p></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                        <div class="bg-orange-100 p-4 rounded-lg text-orange-600 mr-4"><i class="fas fa-procedures text-xl"></i></div>
+                        <div><p class="text-sm text-gray-500 font-medium">Sakit</p><p class="text-2xl font-bold text-gray-800" id="statPublicSakit">0</p></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                        <div class="bg-red-100 p-4 rounded-lg text-red-600 mr-4"><i class="fas fa-exclamation-triangle text-xl"></i></div>
+                        <div><p class="text-sm text-gray-500 font-medium">Resiko Tinggi</p><p class="text-2xl font-bold text-gray-800" id="statPublicResiko">0</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Beranda -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Persentase Kondisi Kesehatan</h3>
+                    <div class="relative h-64 w-full flex justify-center"><canvas id="publicPieChart"></canvas></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Persentase Kehadiran</h3>
+                    <div class="relative h-64 w-full flex justify-center"><canvas id="publicDonutChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Tabel Data Jamaah (Beranda) -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8">
+                <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-white"><i class="fas fa-address-book mr-2"></i> Data Induk Jamaah Haji</h2>
+                </div>
+                <div id="containerJamaahBeranda"></div> <!-- Dirender oleh JS -->
+            </div>
+        </section>
+
+        <!-- ================= BAGIAN 2: FORM LAPORAN KAROM ================= -->
+        <section id="page-formKarom" class="hidden">
+            <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-primary px-6 py-4">
+                    <h2 class="text-xl font-bold text-white"><i class="fas fa-clipboard-list mr-2"></i> Form Laporan Jemaah (KAROM)</h2>
+                </div>
+                <form id="laporanForm" class="p-6 space-y-6" onsubmit="submitLaporan(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Nama Lengkap Jemaah *</label>
+                            <input type="text" id="inpNama" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">No. Porsi / KTP *</label>
+                            <input type="text" id="inpNoPorsi" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Status Kehadiran *</label>
+                            <select id="inpKehadiran" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
+                                <option value="">-- Pilih Status --</option>
+                                <option value="Hadir di Pemondokan">Hadir di Pemondokan</option>
+                                <option value="Izin Ibadah">Izin Ibadah/Ke Masjid</option>
+                                <option value="Tersesat/Belum Kembali">Tersesat/Belum Kembali</option>
+                                <option value="Dirawat">Dirawat (Klinik/RS)</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Kondisi Kesehatan Harian *</label>
+                            <select id="inpKesehatan" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
+                                <option value="">-- Pilih Kondisi --</option>
+                                <option value="Sehat">Sehat</option>
+                                <option value="Sakit Ringan">Sakit Ringan (Flu, Lelah)</option>
+                                <option value="Sakit Berat">Sakit Berat</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Kategori Resiko Khusus</label>
+                            <div class="flex space-x-4 mt-2">
+                                <label class="inline-flex items-center"><input type="radio" name="resiko" value="Tidak Ada" checked class="text-primary focus:ring-primary h-4 w-4"><span class="ml-2 text-sm">Tidak Ada</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="resiko" value="Lansia" class="text-primary focus:ring-primary h-4 w-4"><span class="ml-2 text-sm">Lansia</span></label>
+                                <label class="inline-flex items-center"><input type="radio" name="resiko" value="Risti Kesehatan" class="text-primary focus:ring-primary h-4 w-4"><span class="ml-2 text-sm">Risti Kesehatan</span></label>
+                            </div>
+                        </div>
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Catatan Khusus KAROM</label>
+                            <textarea id="inpCatatan" rows="3" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary outline-none" placeholder="Tuliskan keluhan..."></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end pt-4 border-t">
+                        <button type="submit" class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-md font-medium flex items-center transition shadow-sm"><i class="fas fa-paper-plane mr-2"></i> Kirim Laporan</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= BAGIAN 3: DASHBOARD PANITIA ================= -->
+        <section id="page-panitiaDash" class="hidden space-y-8">
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Manajemen Data Laporan (KAROM)</h2>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500"><p class="text-xs text-gray-500 uppercase font-semibold">Total Data</p><p class="text-2xl font-bold" id="panitiaTotal">0</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500"><p class="text-xs text-gray-500 uppercase font-semibold">Sehat</p><p class="text-2xl font-bold" id="panitiaSehat">0</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500"><p class="text-xs text-gray-500 uppercase font-semibold">Sakit Ringan</p><p class="text-2xl font-bold" id="panitiaSakitRingan">0</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-500"><p class="text-xs text-gray-500 uppercase font-semibold">Sakit Berat</p><p class="text-2xl font-bold" id="panitiaSakitBerat">0</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-purple-500"><p class="text-xs text-gray-500 uppercase font-semibold">Belum Kembali</p><p class="text-2xl font-bold" id="panitiaTersesat">0</p></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white p-6 rounded-xl shadow border border-gray-100 flex flex-col items-center">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Statistik Kondisi Kesehatan</h3>
+                        <div class="relative h-64 w-full flex justify-center"><canvas id="adminPieChart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow border border-gray-100 flex flex-col items-center">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Statistik Kehadiran</h3>
+                        <div class="relative h-64 w-full flex justify-center"><canvas id="adminDonutChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Tabel Laporan -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <button onclick="bulkDelete()" class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-md text-sm font-medium transition" id="btnBulkDelete" disabled>
+                            <i class="fas fa-trash-alt mr-1"></i> Hapus Terpilih (<span id="bulkCount">0</span>)
+                        </button>
+                        <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                                <input type="text" id="searchTable" onkeyup="renderLaporanTable()" placeholder="Cari nama/porsi..." class="pl-9 pr-4 py-2 border rounded-md text-sm focus:ring-primary outline-none">
+                            </div>
+                            <select id="filterKesehatan" onchange="renderLaporanTable()" class="border rounded-md px-3 py-2 text-sm outline-none">
+                                <option value="">Semua Kondisi</option>
+                                <option value="Sehat">Sehat</option><option value="Sakit Ringan">Sakit Ringan</option><option value="Sakit Berat">Sakit Berat</option>
+                            </select>
+                            <select id="sortTable" onchange="renderLaporanTable()" class="border rounded-md px-3 py-2 text-sm outline-none">
+                                <option value="terbaru">Terbaru</option><option value="terlama">Terlama</option><option value="nama_asc">Nama A-Z</option><option value="nama_desc">Nama Z-A</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full whitespace-nowrap">
+                            <thead class="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider text-left">
+                                <tr>
+                                    <th class="px-6 py-4 w-12"><input type="checkbox" id="checkAll" onchange="toggleCheckAll()" class="rounded"></th>
+                                    <th class="px-6 py-4">Jamaah</th><th class="px-6 py-4">Kehadiran</th><th class="px-6 py-4">Kesehatan</th>
+                                    <th class="px-6 py-4">Resiko</th><th class="px-6 py-4">Catatan KAROM</th><th class="px-6 py-4">Waktu</th><th class="px-6 py-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-gray-200 text-sm"></tbody>
+                        </table>
+                        <div id="emptyState" class="hidden py-12 text-center text-gray-500"><i class="fas fa-folder-open text-4xl mb-3 text-gray-300"></i><p>Tidak ada data laporan ditemukan.</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Data Jamaah (Admin) -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8">
+                <div class="bg-indigo-600 px-6 py-4 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-white"><i class="fas fa-address-book mr-2"></i> Manajemen Data Induk Jamaah</h2>
+                </div>
+                <div id="containerJamaahAdmin"></div> <!-- Dirender oleh JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Navigasi Bawah Mobile -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-white border-t border-gray-200 shadow z-40 flex justify-around items-center pb-safe">
+        <button id="navHomeMobile" onclick="switchPage('landing')" class="nav-link-mobile flex flex-col items-center p-3 text-primary w-full"><i class="fas fa-home text-xl mb-1"></i><span class="text-[10px] font-medium">Beranda</span></button>
+        <button id="navKaromMobile" onclick="switchPage('formKarom')" class="nav-link-mobile hidden flex-col items-center p-3 text-gray-500 w-full"><i class="fas fa-clipboard-list text-xl mb-1"></i><span class="text-[10px] font-medium">Lapor</span></button>
+        <button id="navPanitiaMobile" onclick="switchPage('panitiaDash')" class="nav-link-mobile hidden flex-col items-center p-3 text-gray-500 w-full"><i class="fas fa-chart-pie text-xl mb-1"></i><span class="text-[10px] font-medium">Dashboard</span></button>
+    </nav>
+
+    <!-- ================= MODALS ================= -->
+    
+    <!-- Modal Auth (Login/Register) -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="flex border-b text-center">
+                <button id="tabLogin" class="w-1/2 py-4 tab-active font-medium" onclick="switchAuthTab('login')">Masuk</button>
+                <button id="tabRegister" class="w-1/2 py-4 text-gray-500 hover:text-primary font-medium" onclick="switchAuthTab('register')">Daftar Akun</button>
+            </div>
+            <div class="p-6 relative">
+                <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700"><i class="fas fa-times text-lg"></i></button>
+
+                <!-- Form Login -->
+                <form id="formLogin" class="space-y-4 block" onsubmit="handleLogin(event)">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Login Sebagai (Role)</label>
+                        <select id="loginRole" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary outline-none bg-white">
+                            <option value="karom">Ketua Rombongan (KAROM)</option>
+                            <option value="panitia">Panitia (Admin Pusat)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-user"></i></span><input type="text" id="loginUsername" required class="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-primary outline-none"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-lock"></i></span>
+                            <input type="password" id="loginPassword" required class="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-primary outline-none">
+                            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400" onclick="togglePassword('loginPassword', 'iconEyeLogin')"><i id="iconEyeLogin" class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-2.5 rounded-lg font-semibold mt-4 transition shadow">Masuk Sekarang</button>
+                </form>
+
+                <!-- Form Register -->
+                <form id="formRegister" class="space-y-4 hidden" onsubmit="handleRegister(event)">
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label><input type="text" id="regNama" required class="w-full px-3 py-2 border rounded-lg focus:ring-primary outline-none"></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Rombongan (Kloter)</label><input type="text" id="regKloter" placeholder="Contoh: JKG-12" required class="w-full px-3 py-2 border rounded-lg focus:ring-primary outline-none"></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Username</label><input type="text" id="regUsername" required class="w-full px-3 py-2 border rounded-lg focus:ring-primary outline-none"></div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <input type="password" id="regPassword" required class="w-full pr-10 pl-3 py-2 border rounded-lg focus:ring-primary outline-none">
+                            <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400" onclick="togglePassword('regPassword', 'iconEyeReg')"><i id="iconEyeReg" class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold mt-4 transition shadow">Daftar Akun KAROM</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form Jamaah (CRUD) -->
+    <div id="modalJamaah" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
+                <h3 class="font-bold" id="titleModalJamaah">Tambah Data Jamaah</h3>
+                <button onclick="closeModalJamaah()" class="hover:text-gray-200"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formJamaah" class="p-4 space-y-4" onsubmit="saveJamaah(event)">
+                <input type="hidden" id="jamId">
+                <div><label class="block text-sm font-medium">Nama Lengkap</label><input type="text" id="jamNama" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></div>
+                <div><label class="block text-sm font-medium">No Porsi</label><input type="text" id="jamPorsi" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></div>
+                <div><label class="block text-sm font-medium">Kloter</label><input type="text" id="jamKloter" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></div>
+                <div>
+                    <label class="block text-sm font-medium">Jenis Kelamin</label>
+                    <select id="jamJk" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required>
+                        <option value="L">Laki-laki (L)</option>
+                        <option value="P">Perempuan (P)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeModalJamaah()" class="bg-gray-200 px-4 py-2 rounded text-sm text-gray-700">Batal</button>
+                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded text-sm font-medium">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hidden Input for Excel Import -->
+    <input type="file" id="importJamaahFile" accept=".xlsx, .xls" class="hidden" onchange="importJamaahExcel(event)">
+
+    <!-- Toast -->
+    <div id="toastContainer" class="fixed bottom-20 md:bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycby3Q2b-Mf6ukm5ggCVYnwKkOv7Qn2nPCGjspccUOaQe7HtkzQZImF23P1nkmfneQp2t/exec"; 
+
+        // --- STATE ---
+        let reports = [];
+        let registeredUsers = []; 
+        let jamaahData = []; // Data Master Jamaah
+        let currentUser = null; 
+        let chartInstances = { publicPie: null, publicDonut: null, adminPie: null, adminDonut: null };
+
+        // INIT
+        window.onload = async () => {
+            renderJamaahTableComponent('containerJamaahBeranda', 'brnd', true);
+            renderJamaahTableComponent('containerJamaahAdmin', 'adm', false);
+            
+            if (API_URL) {
+                try {
+                    const response = await fetch(API_URL);
+                    const res = await response.json();
+                    if (res.status === 'success') {
+                        reports = res.data.map(item => ({ ...item, id: parseInt(item.id), tanggal: new Date(item.tanggal) }));
+                        if (res.users) registeredUsers = res.users;
+                        if (res.jamaah) jamaahData = res.jamaah;
+                        
+                        updateStatistics();
+                        renderLaporanTable();
+                        renderAllJamaahTables();
+                    }
+                } catch (e) { console.error("Gagal load API", e); }
+            }
         };
-      });
-    }
 
-    let currentUser = null;
-    let dataTable = null;
-    let allLaporanData = [];
-    let chartKesehatanObj = null;
-    let chartKehadiranObj = null;
-    let autoRefreshTimer = null;
+        // --- AUTH & NAVIGATION ---
+        function switchPage(pageId) {
+            document.getElementById('page-landing').classList.add('hidden');
+            document.getElementById('page-formKarom').classList.add('hidden');
+            document.getElementById('page-panitiaDash').classList.add('hidden');
+            document.getElementById('page-' + pageId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-link').forEach(el => { el.classList.remove('text-primary'); el.classList.add('text-gray-600'); });
+            document.querySelectorAll('.nav-link-mobile').forEach(el => { el.classList.remove('text-primary'); el.classList.add('text-gray-500'); });
 
-    // --- INISIALISASI SAAT HALAMAN DIMUAT ---
-    $(document).ready(function() {
-      // Ambil pengaturan awal dari Backend Database (Judul, Subjudul, URL DB)
-      window.google.script.run.withSuccessHandler(function(settings) {
-        $('#setJudul').val(settings.judul);
-        $('#setSubJudul').val(settings.subJudul);
-        $('#setWebAppUrl').val(settings.databaseUrl ? settings.databaseUrl : 'https://script.google.com/macros/s/AKfycby3Q2b-Mf6ukm5ggCVYnwKkOv7Qn2nPCGjspccUOaQe7HtkzQZImF23P1nkmfneQp2t/exec');
-        $('#app-main-title').html(`<i class="fas fa-satellite-dish me-2"></i>${settings.judul}`);
-        $('#app-sub-title').text(settings.subJudul);
-      }).getAppSettings();
-      
-      loadPublicStats();
-      updateBottomNavUI();
-      
-      dataTable = $('#tabelLaporan').DataTable({
-        responsive: true, order: [[1, 'desc']],
-        columnDefs: [ { targets: [0, 9], orderable: false, className: 'text-center' } ],
-        language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json' },
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
-      });
+            const desktopId = pageId === 'landing' ? 'navHome' : pageId === 'formKarom' ? 'navKarom' : 'navPanitia';
+            const mobileId = desktopId + 'Mobile';
+            document.getElementById(desktopId).classList.add('text-primary');
+            document.getElementById(mobileId).classList.add('text-primary');
 
-      $('#filterKesehatan').on('change', function() { dataTable.column(5).search(this.value).draw(); });
-      $('#filterKehadiran').on('change', function() { dataTable.column(4).search(this.value).draw(); });
-      $('#checkAll').on('click', function() { $('.row-check').prop('checked', this.checked); });
-      $('#tabelLaporan tbody').on('change', '.row-check', function() { if (!this.checked) $('#checkAll').prop('checked', false); });
-
-      // Event Toggle Auto Refresh (Tiap 30 Detik)
-      $('#toggleAutoRefresh').change(function() {
-        if($(this).is(':checked')) {
-          Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Auto Refresh Aktif (30s)', showConfirmButton: false, timer: 1500});
-          autoRefreshTimer = setInterval(() => { loadTableData(true); loadPublicStats(true); }, 30000);
-        } else {
-          clearInterval(autoRefreshTimer);
-          Swal.fire({toast: true, position: 'top-end', icon: 'info', title: 'Auto Refresh Dinonaktifkan', showConfirmButton: false, timer: 1500});
+            if(pageId === 'panitiaDash' || pageId === 'landing') { updateStatistics(); renderAllJamaahTables(); }
+            window.scrollTo(0, 0);
         }
-      });
-    });
 
-    // --- STATUS KONEKSI ---
-    function setConnectionStatus(isOnline) {
-      const dot = $('#conn-dot');
-      const text = $('#conn-text');
-      if(isOnline) {
-        dot.removeClass('bg-offline').addClass('bg-success pulsing-dot');
-        text.text('Online').removeClass('text-danger').addClass('text-muted');
-      } else {
-        dot.removeClass('pulsing-dot bg-success').addClass('bg-offline');
-        text.text('Offline').removeClass('text-muted').addClass('text-danger');
-      }
-    }
-
-    // --- PENGATURAN ADMIN ---
-    $('#formPengaturan').submit(function(e) {
-      e.preventDefault();
-      showLoading();
-      const judulBaru = $('#setJudul').val();
-      const subBaru = $('#setSubJudul').val();
-      const urlBaru = $('#setWebAppUrl').val();
-      
-      window.google.script.run.withSuccessHandler(function(res) {
-        hideLoading();
-        setConnectionStatus(true);
-        $('#app-main-title').html(`<i class="fas fa-satellite-dish me-2"></i>${judulBaru}`);
-        $('#app-sub-title').text(subBaru);
-        $('#collapsePengaturan').collapse('hide');
-        Swal.fire({toast: true, position: 'top-end', icon: 'success', title: res.message, showConfirmButton: false, timer: 2000});
-        setTimeout(() => { loadTableData(true); loadPublicStats(true); }, 1000);
-      }).withFailureHandler(failHandler).saveAppSettings(judulBaru, subBaru, urlBaru);
-    });
-
-    // --- FUNGSI UI & NAVIGASI ---
-    function showLoading() { $('#loader').css('display', 'flex'); }
-    function hideLoading() { $('#loader').css('display', 'none'); }
-
-    function switchSection(sectionId) {
-      $('.app-section').addClass('d-none'); $('#' + sectionId).removeClass('d-none'); window.scrollTo(0, 0); 
-    }
-
-    function goHome() {
-      if(!currentUser) { switchSection('section-landing'); setActiveBnav('bnav-home'); } 
-      else if(currentUser.role === 'Admin') { switchSection('section-admin'); setActiveBnav('bnav-admin'); loadTableData(); } 
-      else { switchSection('section-karom'); setActiveBnav('bnav-form'); }
-    }
-
-    function navBottomClick(target) {
-      if(target === 'home') goHome();
-      else if(target === 'form' && currentUser && currentUser.role === 'KAROM') { switchSection('section-karom'); setActiveBnav('bnav-form'); }
-      else if(target === 'admin' && currentUser && currentUser.role === 'Admin') { switchSection('section-admin'); setActiveBnav('bnav-admin'); loadTableData(); }
-    }
-
-    function setActiveBnav(id) { $('.nav-item-bottom').removeClass('active'); $('#' + id).addClass('active'); }
-
-    function updateBottomNavUI() {
-      if(!currentUser) {
-        $('#bnav-home').removeClass('d-none'); $('#bnav-login').removeClass('d-none');
-        $('#bnav-form, #bnav-admin, #bnav-logout').addClass('d-none');
-      } else {
-        $('#bnav-home, #bnav-login').addClass('d-none'); $('#bnav-logout').removeClass('d-none');
-        if(currentUser.role === 'Admin') { $('#bnav-admin').removeClass('d-none'); $('#bnav-form').addClass('d-none'); setActiveBnav('bnav-admin'); } 
-        else { $('#bnav-form').removeClass('d-none'); $('#bnav-admin').addClass('d-none'); setActiveBnav('bnav-form'); }
-      }
-    }
-
-    function togglePassword(inId, icId) {
-      const inp = document.getElementById(inId); const ic = document.getElementById(icId);
-      if (inp.type === "password") { inp.type = "text"; ic.className = "fas fa-eye-slash text-secondary"; } 
-      else { inp.type = "password"; ic.className = "fas fa-eye text-secondary"; }
-    }
-
-    function showRegisterModal() { $('#loginModal').modal('hide'); setTimeout(() => { $('#registerModal').modal('show'); }, 400); }
-
-    // --- FORM SUBMITS ---
-    $('#formLogin').on('submit', function(e) {
-      e.preventDefault(); showLoading();
-      window.google.script.run.withSuccessHandler(res => {
-        hideLoading(); setConnectionStatus(true);
-        if(res.status === 'success') {
-          $('#loginModal').modal('hide');
-          currentUser = res; currentUser.username = this.username.value;
-          $('#btn-login-nav').addClass('d-none'); $('#btn-logout-nav').removeClass('d-none');
-          $('#user-info').removeClass('d-none').html(`<i class="fas fa-user-circle"></i> ${res.nama}`);
-          updateBottomNavUI(); goHome();
-          Swal.fire({ icon: 'success', title: 'Login Berhasil', timer: 1500, showConfirmButton: false });
-          $('#formLogin')[0].reset();
-        } else Swal.fire('Gagal!', res.message, 'error');
-      }).withFailureHandler(failHandler).loginUser(this.username.value, this.password.value);
-    });
-
-    function logout() {
-      currentUser = null;
-      $('#btn-login-nav').removeClass('d-none'); $('#btn-logout-nav').addClass('d-none');
-      $('#user-info').addClass('d-none').text('');
-      if(autoRefreshTimer) { clearInterval(autoRefreshTimer); $('#toggleAutoRefresh').prop('checked', false); }
-      updateBottomNavUI(); goHome(); loadPublicStats();
-    }
-
-    $('#formRegister').on('submit', function(e) {
-      e.preventDefault(); showLoading();
-      let formData = { nama: this.nama.value, rombongan: this.rombongan.value, username: this.username.value, password: this.password.value };
-      window.google.script.run.withSuccessHandler(res => {
-        hideLoading(); setConnectionStatus(true);
-        if(res.status === 'success') {
-          $('#registerModal').modal('hide');
-          Swal.fire('Berhasil!', res.message, 'success').then(() => { $('#loginModal').modal('show'); });
-          $('#formRegister')[0].reset();
-        } else Swal.fire('Gagal!', res.message, 'error');
-      }).withFailureHandler(failHandler).registerKarom(formData);
-    });
-
-    $('#formLaporan').on('submit', function(e) {
-      e.preventDefault(); showLoading();
-      let formData = {}; $.map($(this).serializeArray(), (n) => formData[n.name] = n.value);
-      window.google.script.run.withSuccessHandler(res => {
-        hideLoading(); setConnectionStatus(true);
-        if(res.status === 'success') { Swal.fire('Terkirim!', res.message, 'success'); $('#formLaporan')[0].reset(); }
-      }).withFailureHandler(failHandler).submitLaporan(formData, currentUser.username);
-    });
-
-    $('#formEdit').on('submit', function(e) {
-      e.preventDefault(); showLoading();
-      let formData = {}; $.map($(this).serializeArray(), (n) => formData[n.name] = n.value);
-      window.google.script.run.withSuccessHandler(res => {
-        hideLoading(); setConnectionStatus(true);
-        if(res.status === 'success') { $('#editModal').modal('hide'); Swal.fire('Tersimpan!', res.message, 'success'); loadTableData(); }
-      }).withFailureHandler(failHandler).updateLaporan(formData);
-    });
-
-    // --- DATA FETCHING & RENDERING ---
-    function loadPublicStats(silent = false) {
-      window.google.script.run.withSuccessHandler(stats => {
-        setConnectionStatus(true);
-        $('#stat-sehat').text(stats.sehat); $('#stat-sakit').text(stats.sakit);
-        $('#stat-resti').text(stats.resti); $('#stat-hariini').text(stats.hariIni);
-      }).withFailureHandler(failHandlerSilent).getDashboardStats();
-    }
-
-    function loadTableData(silent = false) {
-      if(!silent) showLoading();
-      window.google.script.run.withSuccessHandler(data => {
-        setConnectionStatus(true);
-        allLaporanData = data; dataTable.clear();
+        function openLoginModal() { document.getElementById('authModal').classList.add('modal-active'); }
+        function closeLoginModal() { document.getElementById('authModal').classList.remove('modal-active'); }
         
-        data.forEach(item => {
-          let tgl = new Date(item.tanggal).toLocaleString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-          let badgeKes = item.kesehatan === 'Sehat' ? 'bg-success' : (item.kesehatan === 'Dirujuk' ? 'bg-danger' : 'bg-warning text-dark');
-          let badgeHadir = item.kehadiran === 'Hadir' ? 'bg-primary' : 'bg-secondary';
-          dataTable.row.add([
-            `<input type="checkbox" class="form-check-input row-check" value="${item.id}">`,
-            tgl, item.nama, item.noporsi,
-            `<span class="badge ${badgeHadir}">${item.kehadiran}</span>`,
-            `<span class="badge ${badgeKes}">${item.kesehatan}</span>`,
-            item.resiko, item.catatan, item.pelapor,
-            `<button class="btn btn-sm btn-outline-warning mb-1 border-0" onclick="openEditModal('${item.id}')"><i class="fas fa-edit"></i></button>
-             <button class="btn btn-sm btn-outline-danger mb-1 border-0" onclick="deleteSingle('${item.id}')"><i class="fas fa-trash"></i></button>`
-          ]);
-        });
-        
-        dataTable.draw(); $('#checkAll').prop('checked', false);
-        renderKaromStats(data); renderAdminCharts(data); 
-        if(!silent) hideLoading();
-      }).withFailureHandler(silent ? failHandlerSilent : failHandler).getAllLaporan();
-    }
-
-    // RENDER GRAFIK & PERSENTASE (ADMIN)
-    function renderAdminCharts(data) {
-      let total = data.length;
-      if(total === 0) return;
-      let kes = { sehat: 0, sakit: 0, dirujuk: 0 };
-      let had = { hadir: 0, sakit: 0, izin: 0 };
-      let resti = 0;
-
-      data.forEach(d => {
-        if(d.kesehatan === 'Sehat') kes.sehat++; else if(d.kesehatan === 'Dirujuk') kes.dirujuk++; else kes.sakit++;
-        if(d.kehadiran === 'Hadir') had.hadir++; else if(d.kehadiran === 'Sakit') had.sakit++; else had.izin++;
-        if(d.resiko && d.resiko !== 'Tidak Ada') resti++;
-      });
-
-      $('#pct-sehat').text(Math.round((kes.sehat/total)*100) + '%');
-      $('#pct-sakit').text(Math.round(((kes.sakit+kes.dirujuk)/total)*100) + '%');
-      $('#pct-hadir').text(Math.round((had.hadir/total)*100) + '%');
-      $('#pct-resti').text(Math.round((resti/total)*100) + '%');
-
-      if(chartKesehatanObj) chartKesehatanObj.destroy();
-      if(chartKehadiranObj) chartKehadiranObj.destroy();
-
-      const ctxKes = document.getElementById('chartKesehatan').getContext('2d');
-      chartKesehatanObj = new Chart(ctxKes, {
-        type: 'pie', data: { labels: ['Sehat', 'Sakit', 'Dirujuk (RS)'], datasets: [{ data: [kes.sehat, kes.sakit, kes.dirujuk], backgroundColor: ['#198754', '#ffc107', '#dc3545'], borderWidth: 2, borderColor: '#fff' }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 11} } } } }
-      });
-
-      const ctxHad = document.getElementById('chartKehadiran').getContext('2d');
-      chartKehadiranObj = new Chart(ctxHad, {
-        type: 'doughnut', data: { labels: ['Hadir', 'Sakit', 'Izin/Lain'], datasets: [{ data: [had.hadir, had.sakit, had.izin], backgroundColor: ['#0d6efd', '#dc3545', '#6c757d'], borderWidth: 2, borderColor: '#fff' }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 11} } } } }
-      });
-    }
-
-    function renderKaromStats(data) {
-      let stats = {};
-      data.forEach(item => {
-        let pelapor = item.pelapor || 'Tidak Diketahui';
-        if (!stats[pelapor]) stats[pelapor] = { total: 0, hadir: 0, sakitHadir: 0, izin: 0, sehat: 0, sakitKes: 0, dirujuk: 0, beresiko: 0 };
-        stats[pelapor].total++;
-        if (item.kehadiran === 'Hadir') stats[pelapor].hadir++; else if (item.kehadiran === 'Sakit') stats[pelapor].sakitHadir++; else stats[pelapor].izin++;
-        if (item.kesehatan === 'Sehat') stats[pelapor].sehat++; else if (item.kesehatan === 'Dirujuk') stats[pelapor].dirujuk++; else stats[pelapor].sakitKes++;
-        if (item.resiko && item.resiko !== 'Tidak Ada') stats[pelapor].beresiko++;
-      });
-      let html = '';
-      if (Object.keys(stats).length === 0) html = `<tr><td colspan="9" class="text-muted py-3">Belum ada data</td></tr>`;
-      else {
-        for (const [karom, s] of Object.entries(stats)) {
-          html += `<tr><td class="text-start fw-bold text-success">${karom}</td><td class="fw-bold bg-light">${s.total}</td><td class="text-primary">${s.hadir}</td><td class="text-danger">${s.sakitHadir}</td><td class="text-secondary">${s.izin}</td><td class="text-success fw-bold">${s.sehat}</td><td class="text-warning text-dark">${s.sakitKes}</td><td class="text-danger fw-bold">${s.dirujuk}</td><td class="text-danger bg-light">${s.beresiko}</td></tr>`;
+        function switchAuthTab(tab) {
+            document.getElementById('formLogin').classList.toggle('hidden', tab !== 'login');
+            document.getElementById('formRegister').classList.toggle('hidden', tab !== 'register');
+            document.getElementById('tabLogin').classList.toggle('tab-active', tab === 'login');
+            document.getElementById('tabRegister').classList.toggle('tab-active', tab === 'register');
         }
-      }
-      $('#tbodyStatKarom').html(html);
-    }
 
-    // --- FUNGSI HAPUS & EDIT ---
-    function deleteSingle(id) {
-      Swal.fire({ title: 'Hapus?', text: "Data tidak dapat dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, Hapus!'
-      }).then((res) => {
-        if (res.isConfirmed) { showLoading(); window.google.script.run.withSuccessHandler(r => { hideLoading(); setConnectionStatus(true); Swal.fire('Terhapus!', r.message, 'success'); loadTableData(); }).withFailureHandler(failHandler).deleteLaporanBulk([id]); }
-      });
-    }
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if(input.type === 'password') { input.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); } 
+            else { input.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+        }
 
-    function deleteSelected() {
-      let ids = []; $('.row-check:checked').each(function() { ids.push($(this).val()); });
-      if(ids.length === 0) return Swal.fire('Peringatan', 'Pilih minimal satu data!', 'warning');
-      Swal.fire({ title: `Hapus ${ids.length} Data?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, Hapus!'
-      }).then((res) => {
-        if (res.isConfirmed) { showLoading(); window.google.script.run.withSuccessHandler(r => { hideLoading(); setConnectionStatus(true); Swal.fire('Terhapus!', r.message, 'success'); loadTableData(); }).withFailureHandler(failHandler).deleteLaporanBulk(ids); }
-      });
-    }
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUsername').value.toLowerCase();
+            const pass = document.getElementById('loginPassword').value;
+            const role = document.getElementById('loginRole').value; // Role yang dipilih di form
+            
+            // Verifikasi Admin default
+            if (user === 'admin' && pass === '123' && role === 'panitia') {
+                currentUser = { role: 'panitia', name: 'Admin Panitia' };
+            } else {
+                const foundUser = registeredUsers.find(u => u.username.toLowerCase() === user && u.password === pass);
+                if (!foundUser) { return showToast('Username atau Password salah!', 'error'); }
+                if (foundUser.role !== role) { return showToast(`Akun ini tidak memiliki akses sebagai ${role}!`, 'error'); }
+                currentUser = { role: foundUser.role, name: foundUser.nama };
+            }
 
-    function openEditModal(id) {
-      let d = allLaporanData.find(x => x.id === id);
-      if(d) {
-        $('#editId').val(d.id); $('#editNama').val(d.nama); $('#editPorsi').val(d.noporsi); $('#editUsia').val(d.usia);
-        $('#editKehadiran').val(d.kehadiran); $('#editKesehatan').val(d.kesehatan); $('#editResiko').val(d.resiko); $('#editCatatan').val(d.catatan);
-        $('#editModal').modal('show');
-      }
-    }
+            closeLoginModal(); updateUIByAuth();
+            showToast(`Selamat datang, ${currentUser.name}`, 'success');
+            if(currentUser.role === 'panitia') switchPage('panitiaDash'); else switchPage('formKarom');
+        }
 
-    function failHandler(err) { hideLoading(); setConnectionStatus(false); Swal.fire('Gagal Terhubung', err.message, 'error'); }
-    function failHandlerSilent(err) { setConnectionStatus(false); console.error("Auto-refresh error:", err); }
-  </script>
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerText = 'Mendaftar...'; btn.disabled = true;
+
+            const newUser = {
+                id: Date.now(), nama: document.getElementById('regNama').value, kloter: document.getElementById('regKloter').value,
+                username: document.getElementById('regUsername').value.toLowerCase(), password: document.getElementById('regPassword').value,
+                role: 'karom'
+            };
+
+            if(registeredUsers.find(u => u.username === newUser.username)) {
+                btn.innerText = 'Daftar Akun KAROM'; btn.disabled = false;
+                return showToast('Username sudah digunakan!', 'error');
+            }
+
+            registeredUsers.push(newUser);
+            if (API_URL) {
+                try {
+                    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'register', data: newUser }) });
+                    showToast('Pendaftaran KAROM berhasil! Silakan login.', 'success');
+                    e.target.reset(); switchAuthTab('login');
+                } catch (err) { showToast('Gagal mendaftar ke spreadsheet', 'error'); }
+            }
+            btn.innerText = 'Daftar Akun KAROM'; btn.disabled = false;
+        }
+
+        function logout() { currentUser = null; updateUIByAuth(); switchPage('landing'); showToast('Anda telah logout', 'info'); }
+
+        function updateUIByAuth() {
+            const btnLogin = document.getElementById('btnLoginMain');
+            const userProfile = document.getElementById('userProfile');
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            const navs = ['navKarom', 'navPanitia', 'navKaromMobile', 'navPanitiaMobile'];
+
+            if(currentUser) {
+                btnLogin.classList.add('hidden'); userProfile.classList.remove('hidden'); userProfile.classList.add('flex');
+                userNameDisplay.innerText = currentUser.name;
+                
+                navs.forEach(id => document.getElementById(id).classList.add('hidden'));
+                if(currentUser.role === 'karom') {
+                    document.getElementById('navKarom').classList.remove('hidden');
+                    document.getElementById('navKaromMobile').classList.replace('hidden', 'flex');
+                } else {
+                    document.getElementById('navPanitia').classList.remove('hidden');
+                    document.getElementById('navPanitiaMobile').classList.replace('hidden', 'flex');
+                }
+            } else {
+                btnLogin.classList.remove('hidden'); userProfile.classList.replace('flex', 'hidden');
+                navs.forEach(id => { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); });
+            }
+        }
+
+        // ================= FITUR DATA JAMAAH (EXCEL & CRUD) =================
+        function renderJamaahTableComponent(containerId, prefix, isPublic = false) {
+            let toolbar = '';
+            let aksiHeader = '';
+
+            if (isPublic) {
+                // Tampilan Beranda: Hanya fitur Search & Sort (Cukup tabel data saja)
+                toolbar = `
+                <div class="p-4 border-b bg-gray-50 flex flex-col md:flex-row justify-end items-center gap-4">
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <div class="relative"><i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i><input type="text" id="searchJam_${prefix}" onkeyup="renderAllJamaahTables()" placeholder="Cari Jamaah..." class="pl-9 pr-4 py-2 border rounded-md text-sm outline-none w-full md:w-64"></div>
+                        <select id="sortJam_${prefix}" onchange="renderAllJamaahTables()" class="border rounded-md px-3 py-2 text-sm outline-none">
+                            <option value="nama_asc">Nama A-Z</option><option value="nama_desc">Nama Z-A</option><option value="kloter">Kloter</option>
+                        </select>
+                    </div>
+                </div>`;
+            } else {
+                // Tampilan Admin: Full Fitur (Template, Import, Export, Tambah)
+                toolbar = `
+                <div class="p-4 border-b bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex space-x-2">
+                        <button onclick="downloadTemplateJamaah()" class="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-3 py-2 rounded text-sm font-medium transition"><i class="fas fa-file-excel mr-1"></i> Template</button>
+                        <button onclick="document.getElementById('importJamaahFile').click()" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-2 rounded text-sm font-medium transition"><i class="fas fa-upload mr-1"></i> Import</button>
+                        <button onclick="exportJamaahExcel()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-2 rounded text-sm font-medium transition"><i class="fas fa-download mr-1"></i> Export</button>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <div class="relative"><i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i><input type="text" id="searchJam_${prefix}" onkeyup="renderAllJamaahTables()" placeholder="Cari Jamaah..." class="pl-9 pr-4 py-2 border rounded-md text-sm outline-none w-full md:w-64"></div>
+                        <select id="sortJam_${prefix}" onchange="renderAllJamaahTables()" class="border rounded-md px-3 py-2 text-sm outline-none">
+                            <option value="nama_asc">Nama A-Z</option><option value="nama_desc">Nama Z-A</option><option value="kloter">Kloter</option>
+                        </select>
+                        <button onclick="openModalJamaah()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"><i class="fas fa-plus mr-1"></i> Tambah</button>
+                    </div>
+                </div>`;
+                aksiHeader = '<th class="px-6 py-3 text-center">Aksi</th>';
+            }
+
+            document.getElementById(containerId).innerHTML = `
+                ${toolbar}
+                <div class="overflow-x-auto">
+                    <table class="w-full whitespace-nowrap text-sm">
+                        <thead class="bg-gray-100 text-gray-600 uppercase text-left">
+                            <tr><th class="px-6 py-3">No</th><th class="px-6 py-3">Nama Jamaah</th><th class="px-6 py-3">No Porsi</th><th class="px-6 py-3">Kloter</th><th class="px-6 py-3">L/P</th>${aksiHeader}</tr>
+                        </thead>
+                        <tbody id="tbodyJam_${prefix}" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderAllJamaahTables() {
+            ['brnd', 'adm'].forEach(prefix => {
+                const tbody = document.getElementById(`tbodyJam_${prefix}`);
+                if(!tbody) return;
+                const search = document.getElementById(`searchJam_${prefix}`).value.toLowerCase();
+                const sort = document.getElementById(`sortJam_${prefix}`).value;
+                
+                let data = jamaahData.filter(j => j.nama.toLowerCase().includes(search) || j.porsi.toString().includes(search) || j.kloter.toLowerCase().includes(search));
+                data.sort((a, b) => sort === 'nama_asc' ? a.nama.localeCompare(b.nama) : (sort === 'nama_desc' ? b.nama.localeCompare(a.nama) : a.kloter.localeCompare(b.kloter)));
+
+                const isPublic = prefix === 'brnd';
+                const colspan = isPublic ? 5 : 6;
+
+                tbody.innerHTML = data.length === 0 ? `<tr><td colspan="${colspan}" class="text-center py-6 text-gray-500">Data Jamaah Kosong</td></tr>` : 
+                    data.map((j, i) => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-3 text-gray-500">${i+1}</td>
+                        <td class="px-6 py-3 font-medium text-gray-900">${j.nama}</td>
+                        <td class="px-6 py-3 text-gray-600">${j.porsi}</td>
+                        <td class="px-6 py-3"><span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs font-semibold">${j.kloter}</span></td>
+                        <td class="px-6 py-3">${j.jk}</td>
+                        ${!isPublic ? `
+                        <td class="px-6 py-3 text-center">
+                            <button onclick="editJamaah(${j.id})" class="text-blue-500 hover:text-blue-700 px-2"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteJamaah(${j.id})" class="text-red-500 hover:text-red-700 px-2"><i class="fas fa-trash"></i></button>
+                        </td>` : ''}
+                    </tr>`).join('');
+            });
+        }
+
+        function openModalJamaah(id = null) {
+            document.getElementById('formJamaah').reset();
+            document.getElementById('jamId').value = '';
+            document.getElementById('titleModalJamaah').innerText = 'Tambah Data Jamaah';
+            if(id) {
+                const j = jamaahData.find(x => x.id === id);
+                if(j) {
+                    document.getElementById('jamId').value = j.id;
+                    document.getElementById('jamNama').value = j.nama;
+                    document.getElementById('jamPorsi').value = j.porsi;
+                    document.getElementById('jamKloter').value = j.kloter;
+                    document.getElementById('jamJk').value = j.jk;
+                    document.getElementById('titleModalJamaah').innerText = 'Edit Data Jamaah';
+                }
+            }
+            document.getElementById('modalJamaah').classList.add('modal-active');
+        }
+        function closeModalJamaah() { document.getElementById('modalJamaah').classList.remove('modal-active'); }
+        function editJamaah(id) { openModalJamaah(id); }
+        
+        async function saveJamaah(e) {
+            e.preventDefault();
+            const idVal = document.getElementById('jamId').value;
+            const newData = {
+                id: idVal ? parseFloat(idVal) : Date.now(),
+                nama: document.getElementById('jamNama').value,
+                porsi: document.getElementById('jamPorsi').value,
+                kloter: document.getElementById('jamKloter').value,
+                jk: document.getElementById('jamJk').value
+            };
+
+            if (idVal) {
+                const idx = jamaahData.findIndex(x => x.id == idVal);
+                if(idx > -1) jamaahData[idx] = newData;
+                if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateJamaah', data: newData }) });
+            } else {
+                jamaahData.push(newData);
+                if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'createJamaah', data: newData }) });
+            }
+            closeModalJamaah(); renderAllJamaahTables(); showToast('Data Jamaah Tersimpan', 'success');
+        }
+
+        function deleteJamaah(id) {
+            if(!confirm('Hapus data jamaah ini?')) return;
+            jamaahData = jamaahData.filter(j => j.id !== id);
+            renderAllJamaahTables(); showToast('Data dihapus', 'info');
+            if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteJamaah', id: id }) });
+        }
+
+        // EXCEL EXPORT/IMPORT
+        function downloadTemplateJamaah() {
+            const ws = XLSX.utils.json_to_sheet([{ "Nama Lengkap": "", "No Porsi": "", "Kloter": "JKG-01", "Jenis Kelamin": "L/P" }]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, "Template_Import_Jamaah.xlsx");
+        }
+        function exportJamaahExcel() {
+            if(jamaahData.length === 0) return showToast('Data kosong', 'error');
+            const dataToExport = jamaahData.map(j => ({ "Nama Lengkap": j.nama, "No Porsi": j.porsi, "Kloter": j.kloter, "Jenis Kelamin": j.jk }));
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Data Jamaah");
+            XLSX.writeFile(wb, "Data_Jamaah_Export.xlsx");
+        }
+        function importJamaahExcel(e) {
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const ws = workbook[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(ws);
+                
+                const newRecords = json.map(row => ({
+                    id: Date.now() + Math.floor(Math.random() * 1000),
+                    nama: row['Nama Lengkap'] || row['Nama'] || '-',
+                    porsi: row['No Porsi'] || '-',
+                    kloter: row['Kloter'] || '-',
+                    jk: row['Jenis Kelamin'] || row['JK'] || 'L'
+                }));
+                
+                if(newRecords.length > 0) {
+                    jamaahData = [...jamaahData, ...newRecords];
+                    renderAllJamaahTables(); showToast(`${newRecords.length} Data diimport!`, 'success');
+                    if(API_URL) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'importJamaah', data: newRecords }) });
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            e.target.value = ''; // reset input
+        }
+
+        // ================= LAPORAN KAROM LOGIC (EXISTING) =================
+        async function submitLaporan(e) {
+            e.preventDefault();
+            const newReport = {
+                id: Date.now(), nama: document.getElementById('inpNama').value, porsi: document.getElementById('inpNoPorsi').value,
+                kehadiran: document.getElementById('inpKehadiran').value, kesehatan: document.getElementById('inpKesehatan').value,
+                resiko: document.querySelector('input[name="resiko"]:checked').value, catatan: document.getElementById('inpCatatan').value || '-',
+                tanggal: new Date(), pelapor: currentUser ? currentUser.name : 'Unknown'
+            };
+            reports.push(newReport); document.getElementById('laporanForm').reset(); showToast('Laporan berhasil dikirim!', 'success');
+            if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'create', data: { ...newReport, tanggal: newReport.tanggal.toISOString() } }) });
+        }
+
+        function renderLaporanTable() {
+            const tbody = document.getElementById('tableBody');
+            const search = document.getElementById('searchTable').value.toLowerCase();
+            const filterKes = document.getElementById('filterKesehatan').value;
+            const sort = document.getElementById('sortTable').value;
+
+            let data = reports.filter(r => (r.nama.toLowerCase().includes(search) || r.porsi.toLowerCase().includes(search)) && (filterKes === '' || r.kesehatan === filterKes));
+            data.sort((a, b) => sort === 'terbaru' ? b.tanggal - a.tanggal : (sort === 'terlama' ? a.tanggal - b.tanggal : (sort === 'nama_asc' ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama))));
+
+            tbody.innerHTML = data.length === 0 ? '' : data.map(r => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4"><input type="checkbox" class="row-checkbox rounded" value="${r.id}" onchange="updateBulkUI()"></td>
+                    <td class="px-6 py-4"><div class="font-medium">${r.nama}</div><div class="text-xs text-gray-500">Porsi: ${r.porsi}</div></td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-semibold ${r.kehadiran.includes('Tersesat')?'bg-red-100 text-red-800':'bg-blue-100 text-blue-800'}">${r.kehadiran}</span></td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs font-semibold ${r.kesehatan==='Sehat'?'bg-green-100 text-green-800':r.kesehatan==='Sakit Berat'?'bg-red-100 text-red-800':'bg-yellow-100 text-yellow-800'}">${r.kesehatan}</span></td>
+                    <td class="px-6 py-4">${r.resiko !== 'Tidak Ada' ? `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-semibold">${r.resiko}</span>` : '-'}</td>
+                    <td class="px-6 py-4 max-w-xs truncate" title="${r.catatan}">${r.catatan}</td>
+                    <td class="px-6 py-4 text-xs text-gray-500">${r.tanggal.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="openEdit(${r.id})" class="text-blue-500 px-1"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteRow(${r.id})" class="text-red-500 px-1"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`).join('');
+            document.getElementById('emptyState').classList.toggle('hidden', data.length > 0);
+            updateBulkUI(); updateStatistics();
+        }
+
+        // Laporan Utils...
+        function toggleCheckAll() { const chk = document.getElementById('checkAll').checked; document.querySelectorAll('.row-checkbox').forEach(b => b.checked = chk); updateBulkUI(); }
+        function updateBulkUI() { const chk = document.querySelectorAll('.row-checkbox:checked').length; document.getElementById('bulkCount').innerText = chk; document.getElementById('btnBulkDelete').disabled = chk === 0; }
+        function bulkDelete() {
+            if(!confirm('Hapus terpilih?')) return;
+            const ids = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => parseInt(cb.value));
+            reports = reports.filter(r => !ids.includes(r.id)); renderLaporanTable(); showToast('Dihapus', 'info');
+            if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'bulkDelete', ids: ids }) });
+        }
+        function deleteRow(id) {
+            if(confirm('Hapus laporan?')) { reports = reports.filter(r => r.id !== id); renderLaporanTable(); showToast('Dihapus', 'info');
+            if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) }); }
+        }
+
+        // CHART STATS
+        function updateStatistics() {
+            const sehat = reports.filter(r => r.kesehatan === 'Sehat').length, ringan = reports.filter(r => r.kesehatan === 'Sakit Ringan').length, berat = reports.filter(r => r.kesehatan === 'Sakit Berat').length;
+            const hadir = reports.filter(r => r.kehadiran === 'Hadir di Pemondokan').length, izin = reports.filter(r => r.kehadiran === 'Izin Ibadah').length, dirawat = reports.filter(r => r.kehadiran === 'Dirawat').length, hilang = reports.filter(r => r.kehadiran.includes('Tersesat')).length;
+            
+            document.getElementById('statPublicTotal').innerText = reports.length; document.getElementById('statPublicSehat').innerText = sehat; document.getElementById('statPublicSakit').innerText = ringan + berat; document.getElementById('statPublicResiko').innerText = reports.filter(r => r.resiko !== 'Tidak Ada').length;
+            if(document.getElementById('panitiaTotal')) { document.getElementById('panitiaTotal').innerText = reports.length; document.getElementById('panitiaSehat').innerText = sehat; document.getElementById('panitiaSakitRingan').innerText = ringan; document.getElementById('panitiaSakitBerat').innerText = berat; document.getElementById('panitiaTersesat').innerText = hilang; }
+            
+            updateChart('publicPie', 'publicPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat'], [sehat, ringan, berat], ['#10b981', '#f59e0b', '#ef4444']);
+            updateChart('publicDonut', 'publicDonutChart', 'doughnut', ['Hadir', 'Izin', 'Dirawat', 'Belum Kembali'], [hadir, izin, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444']);
+            updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat'], [sehat, ringan, berat], ['#10b981', '#f59e0b', '#ef4444']);
+            updateChart('adminDonut', 'adminDonutChart', 'doughnut', ['Hadir', 'Izin', 'Dirawat', 'Belum Kembali'], [hadir, izin, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444']);
+        }
+
+        function updateChart(k, id, t, l, d, c) {
+            const ctx = document.getElementById(id); if (!ctx) return;
+            if (chartInstances[k]) { chartInstances[k].data.datasets[0].data = d; chartInstances[k].update(); } 
+            else { chartInstances[k] = new Chart(ctx, { type: t, data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }); }
+        }
+
+        function showToast(msg, type='info') {
+            const toast = document.createElement('div'); toast.className = `${type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-gray-800')} text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500 flex items-center space-x-2 text-sm`;
+            toast.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-info-circle'}"></i> <span>${msg}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => toast.classList.add('opacity-0'), 2500); setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
 </body>
 </html>
