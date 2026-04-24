@@ -34,7 +34,6 @@
         .tab-active { border-bottom: 2px solid #059669; color: #059669; font-weight: 600; }
         [x-cloak] { display: none; }
         
-        /* CSS Tambahan untuk Toggle Switch Auto Refresh */
         .toggle-checkbox:checked ~ .toggle-block { background-color: #059669; }
         .toggle-checkbox:checked ~ .toggle-dot { transform: translateX(100%); }
     </style>
@@ -58,12 +57,10 @@
 
                     <!-- Indikator Koneksi & Auto Refresh -->
                     <div class="flex items-center space-x-3 border-r border-gray-200 pr-3 mr-1">
-                        <!-- Status Koneksi -->
                         <div class="flex items-center" title="Status Koneksi Database">
                             <i id="connStatusDot" class="fas fa-circle text-gray-400 text-[10px] sm:text-xs transition-colors"></i>
                             <span id="connStatusText" class="ml-1.5 text-[10px] font-medium text-gray-500 hidden sm:inline-block">Menunggu</span>
                         </div>
-                        <!-- Toggle Auto Refresh -->
                         <div class="flex items-center" title="Auto Refresh Data (10 detik)">
                             <label for="autoRefreshToggle" class="flex items-center cursor-pointer">
                                 <div class="relative">
@@ -178,22 +175,22 @@
                         <!-- Rombongan & Regu -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-700">Rombongan *</label>
-                            <select id="inpRombongan" required onchange="filterNamaByRomReg()" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
+                            <select id="inpRombongan" required onchange="handleRombonganChange()" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
                                 <option value="">-- Pilih Rombongan --</option>
                             </select>
                         </div>
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-700">Regu *</label>
                             <select id="inpRegu" required onchange="filterNamaByRomReg()" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
-                                <option value="">-- Pilih Regu --</option>
+                                <option value="">-- Pilih Rombongan Dulu --</option>
                             </select>
                         </div>
 
-                        <!-- Data Jamaah (Terhubung dengan Data Induk) -->
+                        <!-- Data Jamaah -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-700">Nama Lengkap Jemaah *</label>
                             <select id="inpNama" required onchange="autoFillPorsi()" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
-                                <option value="">-- Pilih Jemaah (Data Induk) --</option>
+                                <option value="">-- Pilih Regu Dulu --</option>
                             </select>
                         </div>
                         <div class="space-y-2">
@@ -201,17 +198,20 @@
                             <input type="text" id="inpNoPorsi" readonly class="w-full border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none" placeholder="Otomatis terisi...">
                         </div>
                         
-                        <!-- Kondisi -->
-                        <div class="space-y-2">
+                        <!-- Kondisi Kehadiran & Kesehatan -->
+                        <div class="space-y-2 md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700">Status Kehadiran *</label>
                             <select id="inpKehadiran" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
                                 <option value="">-- Pilih Status --</option>
-                                <option value="Hadir di Pemondokan">Hadir di Pemondokan</option>
-                                <option value="Izin Ibadah">Izin Ibadah/Ke Masjid</option>
-                                <option value="Tersesat/Belum Kembali">Tersesat/Belum Kembali</option>
-                                <option value="Dirawat">Dirawat (Klinik/RS)</option>
+                                <option value="Hadir ada di hotel/maktab">Hadir ada di hotel/maktab</option>
+                                <option value="Izin ke masjid/ibadah">Izin ke masjid/ibadah</option>
+                                <option value="Ziarah/wisata/belanja">Ziarah/wisata/belanja</option>
+                                <option value="Tersesat/belum kembali">Tersesat/belum kembali</option>
+                                <option value="Dirawat (klinik/RS)">Dirawat (klinik/RS)</option>
                             </select>
                         </div>
+                        
+                        <!-- Kesehatan & Resiko Khusus -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-700">Kondisi Kesehatan Harian *</label>
                             <select id="inpKesehatan" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
@@ -221,19 +221,20 @@
                                 <option value="Sakit Berat">Sakit Berat</option>
                             </select>
                         </div>
-
-                        <!-- Kategori -->
-                        <div class="space-y-2 md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Kategori Resiko Khusus</label>
-                            <div class="flex flex-wrap gap-3 mt-2">
-                                <label class="inline-flex items-center"><input type="radio" name="resiko" value="Tidak Ada" checked class="text-primary focus:ring-primary h-4 w-4"><span class="ml-2 text-sm">Tidak Ada</span></label>
-                                <label class="inline-flex items-center"><input type="radio" name="resiko" value="Lansia" class="text-primary focus:ring-primary h-4 w-4"><span class="ml-2 text-sm">Lansia</span></label>
-                                <label class="inline-flex items-center"><input type="radio" name="resiko" value="Risti Kesehatan" class="text-primary focus:ring-primary h-4 w-4"><span class="ml-2 text-sm">Risti Kesehatan</span></label>
-                            </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Kategori Resiko Khusus *</label>
+                            <select id="inpResiko" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
+                                <option value="Tidak ada">Tidak ada</option>
+                                <option value="Disabilitas">Disabilitas</option>
+                                <option value="Lansia">Lansia</option>
+                                <option value="Risti kesehatan">Risti kesehatan</option>
+                            </select>
                         </div>
+
+                        <!-- Catatan Khusus -->
                         <div class="space-y-2 md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700">Catatan Khusus KARU</label>
-                            <textarea id="inpCatatan" rows="3" class="w-full border border-gray-300 rounded-md px-3 md:px-4 py-2 focus:ring-primary outline-none text-sm md:text-base" placeholder="Tuliskan keluhan..."></textarea>
+                            <textarea id="inpCatatan" rows="3" class="w-full border border-gray-300 rounded-md px-3 md:px-4 py-2 focus:ring-primary outline-none text-sm md:text-base" placeholder="Tuliskan keterangan detail jika ada jemaah tersesat, dirawat, atau sakit..."></textarea>
                         </div>
                     </div>
                     <div class="flex justify-end pt-4 border-t">
@@ -296,13 +297,19 @@
                             </div>
                         </div>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto relative max-h-[600px] overflow-y-auto">
                         <table class="w-full whitespace-nowrap">
                             <thead class="bg-gray-100 text-gray-600 text-[10px] md:text-xs uppercase tracking-wider text-left">
                                 <tr>
-                                    <th class="px-3 py-3 md:px-6 md:py-4 w-10"><input type="checkbox" id="checkAll" onchange="toggleCheckAll()" class="rounded"></th>
-                                    <th class="px-3 py-3 md:px-6 md:py-4">Tgl & Waktu</th><th class="px-3 py-3 md:px-6 md:py-4">Rom/Regu</th><th class="px-3 py-3 md:px-6 md:py-4">Jamaah</th><th class="px-3 py-3 md:px-6 md:py-4">Kehadiran</th><th class="px-3 py-3 md:px-6 md:py-4">Kesehatan</th>
-                                    <th class="px-3 py-3 md:px-6 md:py-4">Resiko</th><th class="px-3 py-3 md:px-6 md:py-4 hidden md:table-cell">Catatan KARU</th><th class="px-3 py-3 md:px-6 md:py-4 text-center">Aksi</th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 w-10 sticky top-0 bg-gray-100 z-10 shadow-sm"><input type="checkbox" id="checkAll" onchange="toggleCheckAll()" class="rounded"></th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Tgl & Waktu</th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Rom/Regu</th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Jamaah</th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Kehadiran</th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Kesehatan</th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Resiko</th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 hidden md:table-cell sticky top-0 bg-gray-100 z-10 shadow-sm">Catatan KARU</th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 text-center sticky top-0 bg-gray-100 z-10 shadow-sm">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="divide-y divide-gray-200 text-xs md:text-sm"></tbody>
@@ -384,7 +391,7 @@
         </div>
     </div>
 
-    <!-- Modal Form Jamaah (CRUD) DIPERBARUI -->
+    <!-- Modal Form Jamaah (CRUD) -->
     <div id="modalJamaah" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center backdrop-blur-sm p-4 overflow-y-auto">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden my-8">
             <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
@@ -394,8 +401,8 @@
             <form id="formJamaah" class="p-4 md:p-6 space-y-4" onsubmit="saveJamaah(event)">
                 <input type="hidden" id="jamId">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label class="block text-sm font-medium text-gray-700">Rombongan</label><input type="text" id="jamRombongan" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 1" required></div>
-                    <div><label class="block text-sm font-medium text-gray-700">Regu</label><input type="text" id="jamRegu" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 2" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Rombongan</label><input type="number" id="jamRombongan" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 1" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Regu</label><input type="number" id="jamRegu" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 2" required></div>
                     
                     <div><label class="block text-sm font-medium text-gray-700">Nomor Urut</label><input type="number" id="jamNoUrut" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 14" required></div>
                     <div><label class="block text-sm font-medium text-gray-700">Nomor Porsi</label><input type="text" id="jamPorsi" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 100012345" required></div>
@@ -438,7 +445,7 @@
         let jamaahData = []; // Data Master Jamaah
         let currentUser = null; 
         let chartInstances = { publicPie: null, publicDonut: null, adminPie: null, adminDonut: null };
-        let autoRefreshInterval = null; // Menyimpan ID interval untuk auto-refresh
+        let autoRefreshInterval = null; 
 
         // INIT
         window.onload = async () => {
@@ -449,7 +456,6 @@
             await fetchDataFromAPI(false);
         };
 
-        // Fungsi pusat untuk menarik data dari API Spreadsheet
         async function fetchDataFromAPI(isSilent = false) {
             if (!API_URL) return updateConnectionStatus('error', 'URL Kosong');
             
@@ -465,7 +471,6 @@
                     }));
                     if (res.users) registeredUsers = res.users;
                     if (res.jamaah) {
-                        // Hilangkan format jam (T00:00:00.000Z) dari tgl_lahir saat ditarik dari server
                         jamaahData = res.jamaah.map(j => ({
                             ...j,
                             tgl_lahir: j.tgl_lahir ? j.tgl_lahir.toString().split('T')[0] : '-'
@@ -473,6 +478,7 @@
                     }
                     
                     updateStatistics();
+                    populateRomReg();
                     renderLaporanTable();
                     renderAllJamaahTables();
                     
@@ -487,30 +493,21 @@
             }
         }
 
-        // Memperbarui indikator UI Status Koneksi (Titik & Teks)
         function updateConnectionStatus(status, text) {
             const dot = document.getElementById('connStatusDot');
             const textEl = document.getElementById('connStatusText');
             
             dot.className = 'fas fa-circle text-[10px] sm:text-xs transition-colors ';
-            if (status === 'loading') {
-                dot.classList.add('text-yellow-500', 'animate-pulse');
-            } else if (status === 'success') {
-                dot.classList.add('text-green-500');
-            } else if (status === 'error') {
-                dot.classList.add('text-red-500');
-            }
+            if (status === 'loading') { dot.classList.add('text-yellow-500', 'animate-pulse'); } 
+            else if (status === 'success') { dot.classList.add('text-green-500'); } 
+            else if (status === 'error') { dot.classList.add('text-red-500'); }
             if (textEl) textEl.innerText = text;
         }
 
-        // Logika Toggle Auto Refresh 10 Detik
         function toggleAutoRefresh() {
             const isChecked = document.getElementById('autoRefreshToggle').checked;
             if (isChecked) {
-                // Jalankan refresh setiap 10 detik di latar belakang (silent mode)
-                autoRefreshInterval = setInterval(() => {
-                    fetchDataFromAPI(true); 
-                }, 10000);
+                autoRefreshInterval = setInterval(() => { fetchDataFromAPI(true); }, 10000);
                 showToast('Auto Refresh 10 detik diaktifkan', 'info');
             } else {
                 clearInterval(autoRefreshInterval);
@@ -541,7 +538,7 @@
             document.getElementById(desktopId).classList.add('text-primary');
             document.getElementById(mobileId).classList.add('text-primary');
 
-            if(pageId === 'panitiaDash' || pageId === 'landing') { updateStatistics(); renderAllJamaahTables(); }
+            if(pageId === 'panitiaDash' || pageId === 'landing') { updateStatistics(); renderAllJamaahTables(); renderLaporanTable(); }
             window.scrollTo(0, 0);
         }
 
@@ -639,25 +636,18 @@
         // ================= FITUR DATA JAMAAH (EXCEL & CRUD) =================
         function populateRomReg() {
             const romSelect = document.getElementById('inpRombongan');
-            const regSelect = document.getElementById('inpRegu');
             const filterRom = document.getElementById('filterRombongan');
             const filterReg = document.getElementById('filterRegu');
 
-            if(!romSelect || !regSelect) return;
+            const uniqueRom = [...new Set(jamaahData.map(j => parseInt(j.rombongan)).filter(n => !isNaN(n)))].sort((a,b) => a - b);
+            const uniqueReg = [...new Set(jamaahData.map(j => parseInt(j.regu)).filter(n => !isNaN(n)))].sort((a,b) => a - b);
 
-            // Dapatkan list Rombongan & Regu unik dari Data Induk
-            const uniqueRom = [...new Set(jamaahData.map(j => j.rombongan).filter(Boolean))].sort((a,b) => a - b);
-            const uniqueReg = [...new Set(jamaahData.map(j => j.regu).filter(Boolean))].sort((a,b) => a - b);
+            if(romSelect) {
+                let romOptions = '<option value="">-- Pilih Rombongan --</option>';
+                uniqueRom.forEach(r => romOptions += `<option value="${r}">Rombongan ${r}</option>`);
+                romSelect.innerHTML = romOptions;
+            }
 
-            let romOptions = '<option value="">-- Pilih Rombongan --</option>';
-            uniqueRom.forEach(r => romOptions += `<option value="${r}">Rombongan ${r}</option>`);
-            romSelect.innerHTML = romOptions;
-
-            let regOptions = '<option value="">-- Pilih Regu --</option>';
-            uniqueReg.forEach(r => regOptions += `<option value="${r}">Regu ${r}</option>`);
-            regSelect.innerHTML = regOptions;
-
-            // Update untuk dropdown filter admin
             if(filterRom) {
                 let fRomOptions = '<option value="">Semua Rom</option>';
                 uniqueRom.forEach(r => fRomOptions += `<option value="${r}">Rom ${r}</option>`);
@@ -668,8 +658,30 @@
                 uniqueReg.forEach(r => fRegOptions += `<option value="${r}">Regu ${r}</option>`);
                 filterReg.innerHTML = fRegOptions;
             }
+        }
 
-            filterNamaByRomReg(); 
+        function handleRombonganChange() {
+            const romVal = document.getElementById('inpRombongan').value;
+            const regSelect = document.getElementById('inpRegu');
+            
+            let regOptions = '<option value="">-- Pilih Regu --</option>';
+            if (romVal) {
+                const rom = parseInt(romVal);
+                if (!isNaN(rom)) {
+                    const startRegu = (rom * 4) - 3;
+                    const endRegu = rom * 4;
+                    for (let i = startRegu; i <= endRegu; i++) {
+                        regOptions += `<option value="${i}">Regu ${i}</option>`;
+                    }
+                } else {
+                    const regs = [...new Set(jamaahData.filter(j => j.rombongan == romVal).map(j => j.regu).filter(Boolean))].sort();
+                    regs.forEach(r => regOptions += `<option value="${r}">Regu ${r}</option>`);
+                }
+            } else {
+                regOptions = '<option value="">-- Pilih Rombongan Dulu --</option>';
+            }
+            regSelect.innerHTML = regOptions;
+            filterNamaByRomReg();
         }
 
         function filterNamaByRomReg() {
@@ -679,22 +691,25 @@
             if(!select) return;
 
             let filteredJamaah = jamaahData;
-            // Saring list nama berdasarkan Rom & Regu yang dipilih
             if(rom) filteredJamaah = filteredJamaah.filter(j => j.rombongan == rom);
             if(reg) filteredJamaah = filteredJamaah.filter(j => j.regu == reg);
 
             let options = '<option value="">-- Pilih Jemaah --</option>';
-            const sortedJamaah = [...filteredJamaah].sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
-            sortedJamaah.forEach(j => {
-                const textRegu = j.rombongan ? `(Rom ${j.rombongan} / Reg ${j.regu})` : '';
-                options += `<option value="${j.nama}" data-porsi="${j.porsi}">${j.nama} ${textRegu}</option>`;
-            });
+            if (!rom && !reg) {
+                options = '<option value="">-- Pilih Regu Dulu --</option>';
+            } else {
+                const sortedJamaah = [...filteredJamaah].sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
+                sortedJamaah.forEach(j => {
+                    options += `<option value="${j.nama}" data-porsi="${j.porsi}">${j.nama}</option>`;
+                });
+            }
             select.innerHTML = options;
             autoFillPorsi(); 
         }
 
         function autoFillPorsi() {
             const select = document.getElementById('inpNama');
+            if (select.selectedIndex === -1) return;
             const selectedOption = select.options[select.selectedIndex];
             const porsi = selectedOption.getAttribute('data-porsi') || '';
             document.getElementById('inpNoPorsi').value = porsi;
@@ -860,15 +875,9 @@
 
         function downloadTemplateJamaah() {
             const ws = XLSX.utils.json_to_sheet([{ 
-                "Rombongan": "1", 
-                "Regu": "2", 
-                "Nomor Urut": "14", 
-                "Nomor Porsi": "100012345", 
-                "Nama Lengkap": "Budi Santoso", 
-                "Tanggal Lahir": "1970-01-01", 
-                "Jenis Kelamin": "L", 
-                "Alamat": "Jl. Merdeka No 1", 
-                "No Telepon": "08123456789" 
+                "Rombongan": "1", "Regu": "2", "Nomor Urut": "14", "Nomor Porsi": "100012345", 
+                "Nama Lengkap": "Budi Santoso", "Tanggal Lahir": "1970-01-01", "Jenis Kelamin": "L", 
+                "Alamat": "Jl. Merdeka No 1", "No Telepon": "08123456789" 
             }]);
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Template");
             XLSX.writeFile(wb, "Template_Import_Jamaah.xlsx");
@@ -877,15 +886,9 @@
         function exportJamaahExcel() {
             if(jamaahData.length === 0) return showToast('Data kosong', 'error');
             const dataToExport = jamaahData.map(j => ({ 
-                "Rombongan": j.rombongan, 
-                "Regu": j.regu, 
-                "Nomor Urut": j.no_urut, 
-                "Nomor Porsi": j.porsi, 
-                "Nama Lengkap": j.nama, 
-                "Tanggal Lahir": (j.tgl_lahir || '').toString().split('T')[0], 
-                "Jenis Kelamin": j.jk, 
-                "Alamat": j.alamat, 
-                "No Telepon": j.telepon 
+                "Rombongan": j.rombongan, "Regu": j.regu, "Nomor Urut": j.no_urut, "Nomor Porsi": j.porsi, 
+                "Nama Lengkap": j.nama, "Tanggal Lahir": (j.tgl_lahir || '').toString().split('T')[0], 
+                "Jenis Kelamin": j.jk, "Alamat": j.alamat, "No Telepon": j.telepon 
             }));
             const ws = XLSX.utils.json_to_sheet(dataToExport);
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Data Jamaah");
@@ -895,66 +898,42 @@
         function importJamaahExcel(e) {
             const file = e.target.files[0]; if(!file) return;
             showToast('Membaca file Excel...', 'info');
-            
             const reader = new FileReader();
             reader.onload = async (evt) => {
                 try {
                     const data = new Uint8Array(evt.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     const ws = workbook[workbook.SheetNames[0]];
-                    
-                    // {raw: false} memastikan tanggal dan angka tetap diformat sebagai string
                     const json = XLSX.utils.sheet_to_json(ws, {raw: false, defval: ""});
-                    
-                    // Cek jika file hanya berisi header tanpa ada baris data jemaah di bawahnya
-                    if (json.length === 0) {
-                        showToast('Gagal: File kosong atau hanya berisi Header', 'error');
-                        e.target.value = '';
-                        return;
-                    }
+                    if (json.length === 0) { showToast('Gagal: File kosong atau hanya berisi Header', 'error'); e.target.value = ''; return; }
                     
                     const newRecords = [];
                     json.forEach((rawRow, index) => {
-                        // Normalisasi Header: Ubah semua key header menjadi huruf kecil dan tanpa spasi di awal/akhir agar kebal typo
                         const row = {};
                         for (let key in rawRow) { row[key.trim().toLowerCase()] = rawRow[key]; }
 
                         const namaJam = row['nama lengkap'] || row['nama'] || '';
                         const porsiJam = row['nomor porsi'] || row['no porsi'] || row['porsi'] || '';
 
-                        // Hanya proses baris yang minimal memiliki isian Nama atau Porsi (mengabaikan baris kosong)
                         if (namaJam !== '' || porsiJam !== '') {
                             newRecords.push({
                                 id: Date.now() + index, 
-                                rombongan: row['rombongan'] || '-', 
-                                regu: row['regu'] || '-',
-                                no_urut: row['nomor urut'] || row['no urut'] || '-', 
-                                porsi: porsiJam || '-',
-                                nama: namaJam || '-', 
-                                tgl_lahir: (row['tanggal lahir'] || row['tgl lahir'] || '').toString().split('T')[0] || '-', 
+                                rombongan: row['rombongan'] || '-', regu: row['regu'] || '-',
+                                no_urut: row['nomor urut'] || row['no urut'] || '-', porsi: porsiJam || '-',
+                                nama: namaJam || '-', tgl_lahir: (row['tanggal lahir'] || row['tgl lahir'] || '').toString().split('T')[0] || '-', 
                                 jk: row['jenis kelamin'] || row['jk'] || 'L',
-                                alamat: row['alamat'] || '-', 
-                                telepon: row['no telepon'] || row['telepon'] || '-'
+                                alamat: row['alamat'] || '-', telepon: row['no telepon'] || row['telepon'] || '-'
                             });
                         }
                     });
                     
                     if(newRecords.length > 0) {
                         jamaahData = [...jamaahData, ...newRecords];
-                        renderAllJamaahTables(); 
-                        showToast(`Mengunggah ${newRecords.length} data ke server...`, 'info');
-                        
+                        renderAllJamaahTables(); showToast(`Mengunggah ${newRecords.length} data ke server...`, 'info');
                         if(API_URL) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'importJamaah', data: newRecords }) });
                         showToast(`${newRecords.length} Data berhasil diimport!`, 'success');
-                    } else {
-                        showToast('Format tidak sesuai. Gunakan file Template!', 'error');
-                    }
-                } catch (error) {
-                    console.error("Import error:", error);
-                    showToast('Gagal memproses file Excel', 'error');
-                } finally {
-                    e.target.value = ''; 
-                }
+                    } else { showToast('Format tidak sesuai. Gunakan file Template!', 'error'); }
+                } catch (error) { console.error("Import error:", error); showToast('Gagal memproses file Excel', 'error'); } finally { e.target.value = ''; }
             };
             reader.readAsArrayBuffer(file); 
         }
@@ -972,15 +951,15 @@
                 waktu_laporan: document.getElementById('inpWaktuLaporan').value,
                 kehadiran: document.getElementById('inpKehadiran').value, 
                 kesehatan: document.getElementById('inpKesehatan').value,
-                resiko: document.querySelector('input[name="resiko"]:checked').value, 
+                resiko: document.getElementById('inpResiko').value, 
                 catatan: document.getElementById('inpCatatan').value || '-',
                 tanggal_submit: new Date().toISOString(), 
                 pelapor: currentUser ? currentUser.name : 'Unknown'
             };
             reports.push(newReport); 
             document.getElementById('laporanForm').reset(); 
-            setDefaultDateForm(); // reset kembali tanggalnya ke hari ini
-            filterNamaByRomReg(); // reset pilihan nama
+            setDefaultDateForm();
+            handleRombonganChange(); 
             showToast('Laporan berhasil dikirim!', 'success');
 
             if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'create', data: newReport }) });
@@ -1001,12 +980,19 @@
                 (filterReg === '' || r.regu == filterReg)
             );
             
-            // Urutkan berdasarkan waktu submit terbaru ke terlama
             data.sort((a, b) => sort === 'terbaru' ? new Date(b.tanggal_submit||0) - new Date(a.tanggal_submit||0) : 
                                (sort === 'terlama' ? new Date(a.tanggal_submit||0) - new Date(b.tanggal_submit||0) : 
                                (sort === 'nama_asc' ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama))));
 
-            tbody.innerHTML = data.length === 0 ? '' : data.map(r => `
+            tbody.innerHTML = data.length === 0 ? '' : data.map(r => {
+                let keHadirClass = 'bg-blue-100 text-blue-800';
+                const kh = (r.kehadiran||'').toLowerCase();
+                if(kh.includes('tersesat')) keHadirClass = 'bg-red-100 text-red-800';
+                else if(kh.includes('dirawat')) keHadirClass = 'bg-yellow-100 text-yellow-800';
+                else if(kh.includes('ziarah')) keHadirClass = 'bg-pink-100 text-pink-800';
+                else if(kh.includes('izin')) keHadirClass = 'bg-purple-100 text-purple-800';
+
+                return `
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 py-3 md:px-6 md:py-4"><input type="checkbox" class="row-checkbox rounded" value="${r.id}" onchange="updateBulkUI()"></td>
                     <td class="px-3 py-3 md:px-6 md:py-4">
@@ -1015,14 +1001,15 @@
                     </td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><div class="font-medium text-gray-800">Rom ${r.rombongan || '-'}</div><div class="text-[10px] md:text-xs text-gray-500">Regu ${r.regu || '-'}</div></td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><div class="font-medium whitespace-normal min-w-[120px] md:min-w-0">${r.nama}</div><div class="text-[10px] md:text-xs text-gray-500">Porsi: ${r.porsi}</div></td>
-                    <td class="px-3 py-3 md:px-6 md:py-4"><span class="px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold ${r.kehadiran.includes('Tersesat')?'bg-red-100 text-red-800':'bg-blue-100 text-blue-800'}">${r.kehadiran}</span></td>
+                    <td class="px-3 py-3 md:px-6 md:py-4"><span class="px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold ${keHadirClass}">${r.kehadiran}</span></td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><span class="px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold ${r.kesehatan==='Sehat'?'bg-green-100 text-green-800':r.kesehatan==='Sakit Berat'?'bg-red-100 text-red-800':'bg-yellow-100 text-yellow-800'}">${r.kesehatan}</span></td>
-                    <td class="px-3 py-3 md:px-6 md:py-4">${r.resiko !== 'Tidak Ada' ? `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold whitespace-nowrap">${r.resiko}</span>` : '-'}</td>
+                    <td class="px-3 py-3 md:px-6 md:py-4">${(r.resiko||'').toLowerCase() !== 'tidak ada' ? `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold whitespace-nowrap">${r.resiko}</span>` : '-'}</td>
                     <td class="px-3 py-3 md:px-6 md:py-4 hidden md:table-cell max-w-xs truncate" title="${r.catatan}">${r.catatan}</td>
                     <td class="px-3 py-3 md:px-6 md:py-4 text-center">
                         <button onclick="deleteRow(${r.id})" class="text-red-500 px-1 md:px-2"><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>`).join('');
+                </tr>`
+            }).join('');
             document.getElementById('emptyState').classList.toggle('hidden', data.length > 0);
             updateBulkUI(); updateStatistics();
         }
@@ -1043,22 +1030,46 @@
 
         // CHART STATS
         function updateStatistics() {
-            const sehat = reports.filter(r => r.kesehatan === 'Sehat').length, ringan = reports.filter(r => r.kesehatan === 'Sakit Ringan').length, berat = reports.filter(r => r.kesehatan === 'Sakit Berat').length;
-            const hadir = reports.filter(r => r.kehadiran === 'Hadir di Pemondokan').length, izin = reports.filter(r => r.kehadiran === 'Izin Ibadah').length, dirawat = reports.filter(r => r.kehadiran === 'Dirawat').length, hilang = reports.filter(r => r.kehadiran.includes('Tersesat')).length;
+            const sehat = reports.filter(r => r.kesehatan === 'Sehat').length;
+            const ringan = reports.filter(r => r.kesehatan === 'Sakit Ringan').length;
+            const berat = reports.filter(r => r.kesehatan === 'Sakit Berat').length;
             
-            document.getElementById('statPublicTotal').innerText = reports.length; document.getElementById('statPublicSehat').innerText = sehat; document.getElementById('statPublicSakit').innerText = ringan + berat; document.getElementById('statPublicResiko').innerText = reports.filter(r => r.resiko !== 'Tidak Ada').length;
-            if(document.getElementById('panitiaTotal')) { document.getElementById('panitiaTotal').innerText = reports.length; document.getElementById('panitiaSehat').innerText = sehat; document.getElementById('panitiaSakitRingan').innerText = ringan; document.getElementById('panitiaSakitBerat').innerText = berat; document.getElementById('panitiaTersesat').innerText = hilang; }
+            const hadir = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length;
+            const izin = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length;
+            const ziarah = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length;
+            const dirawat = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length;
+            const hilang = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
             
-            updateChart('publicPie', 'publicPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat'], [sehat, ringan, berat], ['#10b981', '#f59e0b', '#ef4444']);
-            updateChart('publicDonut', 'publicDonutChart', 'doughnut', ['Hadir', 'Izin', 'Dirawat', 'Belum Kembali'], [hadir, izin, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444']);
-            updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat'], [sehat, ringan, berat], ['#10b981', '#f59e0b', '#ef4444']);
-            updateChart('adminDonut', 'adminDonutChart', 'doughnut', ['Hadir', 'Izin', 'Dirawat', 'Belum Kembali'], [hadir, izin, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444']);
+            const ristiCount = reports.filter(r => (r.resiko||'').toLowerCase() !== 'tidak ada').length;
+            
+            document.getElementById('statPublicTotal').innerText = reports.length; 
+            document.getElementById('statPublicSehat').innerText = sehat; 
+            document.getElementById('statPublicSakit').innerText = ringan + berat; 
+            document.getElementById('statPublicResiko').innerText = ristiCount;
+            
+            if(document.getElementById('panitiaTotal')) { 
+                document.getElementById('panitiaTotal').innerText = reports.length; 
+                document.getElementById('panitiaSehat').innerText = sehat; 
+                document.getElementById('panitiaSakitRingan').innerText = ringan; 
+                document.getElementById('panitiaSakitBerat').innerText = berat; 
+                document.getElementById('panitiaTersesat').innerText = hilang; 
+            }
+            
+            updateChart('publicPie', 'publicPieChart', 'pie', 
+                ['Sehat', 'Sakit Ringan', 'Sakit Berat'], [sehat, ringan, berat], ['#10b981', '#f59e0b', '#ef4444']);
+            updateChart('publicDonut', 'publicDonutChart', 'doughnut', 
+                ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadir, izin, ziarah, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
+            
+            updateChart('adminPie', 'adminPieChart', 'pie', 
+                ['Sehat', 'Sakit Ringan', 'Sakit Berat'], [sehat, ringan, berat], ['#10b981', '#f59e0b', '#ef4444']);
+            updateChart('adminDonut', 'adminDonutChart', 'doughnut', 
+                ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadir, izin, ziarah, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
         }
 
         function updateChart(k, id, t, l, d, c) {
             const ctx = document.getElementById(id); if (!ctx) return;
             if (chartInstances[k]) { chartInstances[k].data.datasets[0].data = d; chartInstances[k].update(); } 
-            else { chartInstances[k] = new Chart(ctx, { type: t, data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }); }
+            else { chartInstances[k] = new Chart(ctx, { type: t, data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 10} } } } } }); }
         }
 
         function showToast(msg, type='info') {
