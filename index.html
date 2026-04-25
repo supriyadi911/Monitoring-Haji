@@ -4,24 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Monitoring Jemaah Haji</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS (Excel Export/Import) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { primary: '#059669', secondary: '#10b981', dark: '#1f2937' }
-                }
+                extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { primary: '#059669', secondary: '#10b981', dark: '#1f2937' } }
             }
         }
     </script>
@@ -33,7 +25,6 @@
         .modal-active { display: flex !important; }
         .tab-active { border-bottom: 2px solid #059669; color: #059669; font-weight: 600; }
         [x-cloak] { display: none; }
-        
         .toggle-checkbox:checked ~ .toggle-block { background-color: #059669; }
         .toggle-checkbox:checked ~ .toggle-dot { transform: translateX(100%); }
     </style>
@@ -78,9 +69,7 @@
                     <div id="userProfile" class="hidden items-center space-x-3">
                         <span id="userNameDisplay" class="text-sm font-semibold text-gray-700 hidden sm:inline-block"></span>
                         <span class="sm:hidden text-sm font-semibold text-primary"><i class="fas fa-user-circle text-xl mt-1"></i></span>
-                        <button class="text-red-500 hover:text-red-700 p-2" onclick="logout()" title="Logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
+                        <button class="text-red-500 hover:text-red-700 p-2" onclick="logout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
                     </div>
                 </div>
             </div>
@@ -90,12 +79,12 @@
     <!-- Main Content -->
     <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
         
-        <!-- ================= BAGIAN 1: LANDING PAGE & DASHBOARD UTAMA ================= -->
+        <!-- BAGIAN 1: LANDING PAGE -->
         <section id="page-landing" class="block animate-fade-in space-y-6 md:space-y-8">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-12 text-center flex flex-col md:flex-row items-center">
                 <div class="md:w-1/2 text-left mb-6 md:mb-0">
                     <h1 class="text-2xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">Sistem Monitoring Terpadu Jemaah Haji</h1>
-                    <p class="text-sm md:text-lg text-gray-600 mb-5 md:mb-6">Membantu Panitia dan Ketua Regu (KARU) dalam melacak kehadiran, kondisi kesehatan, dan resiko khusus jemaah secara real-time.</p>
+                    <p class="text-sm md:text-lg text-gray-600 mb-5 md:mb-6">Membantu Panitia dan Ketua Regu (KARU) dalam melacak posisi, kehadiran, dan kondisi kesehatan jemaah secara real-time.</p>
                     <button class="bg-primary hover:bg-secondary text-white px-5 py-2.5 md:px-6 md:py-3 rounded-lg font-medium shadow-md transition text-sm md:text-base" onclick="openLoginModal()">Mulai Gunakan</button>
                 </div>
                 <div class="md:w-1/2 flex justify-center">
@@ -145,11 +134,11 @@
                 <div class="bg-indigo-600 px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
                     <h2 class="text-lg md:text-xl font-bold text-white"><i class="fas fa-address-book mr-2"></i> Data Induk Jamaah Haji</h2>
                 </div>
-                <div id="containerJamaahBeranda"></div> <!-- Dirender oleh JS -->
+                <div id="containerJamaahBeranda"></div> 
             </div>
         </section>
 
-        <!-- ================= BAGIAN 2: FORM LAPORAN KARU ================= -->
+        <!-- BAGIAN 2: FORM LAPORAN KARU -->
         <section id="page-formKaru" class="hidden">
             <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
                 <div class="bg-primary px-4 md:px-6 py-3 md:py-4">
@@ -158,6 +147,22 @@
                 <form id="laporanForm" class="p-4 md:p-6 space-y-4 md:space-y-6" onsubmit="submitLaporan(event)">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         
+                        <!-- Posisi Saat Ini -->
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700">Posisi Saat Ini *</label>
+                            <select id="inpPosisi" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
+                                <option value="">-- Pilih Posisi Jemaah --</option>
+                                <option value="Lampung">Lampung</option>
+                                <option value="Madinah">Madinah</option>
+                                <option value="Mekkah">Mekkah</option>
+                                <option value="Arafah">Arafah</option>
+                                <option value="Muzdalifah">Muzdalifah</option>
+                                <option value="Mina">Mina</option>
+                                <option value="Jeddah">Jeddah</option>
+                                <option value="Jakarta">Jakarta</option>
+                            </select>
+                        </div>
+
                         <!-- Waktu & Tanggal -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-700">Hari/Tanggal Laporan *</label>
@@ -167,8 +172,8 @@
                             <label class="block text-sm font-medium text-gray-700">Waktu Laporan *</label>
                             <select id="inpWaktuLaporan" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
                                 <option value="">-- Pilih Waktu --</option>
-                                <option value="Pagi">Pagi (06:00 - 18:00)</option>
-                                <option value="Malam">Malam (18:00 - 06:00)</option>
+                                <option value="Pagi (09.00)">Pagi (09.00)</option>
+                                <option value="Malam (21.00)">Malam (21.00)</option>
                             </select>
                         </div>
 
@@ -211,7 +216,6 @@
                             </select>
                         </div>
                         
-                        <!-- Kesehatan & Resiko Khusus -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-700">Kondisi Kesehatan Harian *</label>
                             <select id="inpKesehatan" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
@@ -219,6 +223,7 @@
                                 <option value="Sehat">Sehat</option>
                                 <option value="Sakit Ringan">Sakit Ringan (Flu, Lelah)</option>
                                 <option value="Sakit Berat">Sakit Berat</option>
+                                <option value="Belum diketahui">Belum diketahui</option>
                             </select>
                         </div>
                         <div class="space-y-2">
@@ -244,7 +249,7 @@
             </div>
         </section>
 
-        <!-- ================= BAGIAN 3: DASHBOARD PANITIA ================= -->
+        <!-- BAGIAN 3: DASHBOARD PANITIA -->
         <section id="page-panitiaDash" class="hidden space-y-6 md:space-y-8">
             <div>
                 <div class="flex justify-between items-center mb-3 md:mb-4">
@@ -273,7 +278,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="p-3 md:p-4 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
                         <button onclick="bulkDelete()" class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-md text-sm font-medium transition" id="btnBulkDelete" disabled>
-                            <i class="fas fa-trash-alt mr-1"></i> Hapus Terpilih (<span id="bulkCount">0</span>)
+                            <i class="fas fa-trash-alt mr-1"></i> Hapus (<span id="bulkCount">0</span>)
                         </button>
                         <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                             <div class="relative w-full md:w-auto">
@@ -281,15 +286,14 @@
                                 <input type="text" id="searchTable" onkeyup="renderLaporanTable()" placeholder="Cari nama/porsi..." class="w-full pl-9 pr-4 py-2 border rounded-md text-sm focus:ring-primary outline-none">
                             </div>
                             <div class="flex gap-2 w-full md:w-auto flex-wrap">
-                                <select id="filterRombongan" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none">
-                                    <option value="">Semua Rom</option>
-                                </select>
-                                <select id="filterRegu" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none">
-                                    <option value="">Semua Regu</option>
-                                </select>
+                                <select id="filterRombongan" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none"><option value="">Semua Rom</option></select>
+                                <select id="filterRegu" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none"><option value="">Semua Regu</option></select>
                                 <select id="filterKesehatan" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none">
                                     <option value="">Semua Kondisi</option>
-                                    <option value="Sehat">Sehat</option><option value="Sakit Ringan">Sakit Ringan</option><option value="Sakit Berat">Sakit Berat</option>
+                                    <option value="Sehat">Sehat</option>
+                                    <option value="Sakit Ringan">Sakit Ringan</option>
+                                    <option value="Sakit Berat">Sakit Berat</option>
+                                    <option value="Belum diketahui">Belum diketahui</option>
                                 </select>
                                 <select id="sortTable" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none">
                                     <option value="terbaru">Terbaru</option><option value="terlama">Terlama</option><option value="nama_asc">Nama A-Z</option><option value="nama_desc">Nama Z-A</option>
@@ -303,6 +307,7 @@
                                 <tr>
                                     <th class="px-3 py-3 md:px-6 md:py-4 w-10 sticky top-0 bg-gray-100 z-10 shadow-sm"><input type="checkbox" id="checkAll" onchange="toggleCheckAll()" class="rounded"></th>
                                     <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Tgl & Waktu</th>
+                                    <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Posisi</th>
                                     <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Rom/Regu</th>
                                     <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Jamaah</th>
                                     <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Kehadiran</th>
@@ -324,7 +329,7 @@
                 <div class="bg-indigo-600 px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
                     <h2 class="text-lg md:text-xl font-bold text-white"><i class="fas fa-address-book mr-2"></i> Manajemen Data Induk</h2>
                 </div>
-                <div id="containerJamaahAdmin"></div> <!-- Dirender oleh JS -->
+                <div id="containerJamaahAdmin"></div>
             </div>
         </section>
 
@@ -337,9 +342,7 @@
         <button id="navPanitiaMobile" onclick="switchPage('panitiaDash')" class="nav-link-mobile hidden flex-col items-center p-3 text-gray-500 w-full"><i class="fas fa-chart-pie text-xl mb-1"></i><span class="text-[10px] font-medium">Dashboard</span></button>
     </nav>
 
-    <!-- ================= MODALS ================= -->
-    
-    <!-- Modal Auth (Login/Register) -->
+    <!-- MODAL AUTH -->
     <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
             <div class="flex border-b text-center">
@@ -349,19 +352,9 @@
             <div class="p-6 relative">
                 <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700"><i class="fas fa-times text-lg"></i></button>
 
-                <!-- Form Login -->
                 <form id="formLogin" class="space-y-4 block" onsubmit="handleLogin(event)">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Login Sebagai (Role)</label>
-                        <select id="loginRole" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary outline-none bg-white">
-                            <option value="karu">Ketua Regu (KARU)</option>
-                            <option value="panitia">Panitia (Admin Pusat)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                        <div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-user"></i></span><input type="text" id="loginUsername" required class="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-primary outline-none"></div>
-                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Login Sebagai</label><select id="loginRole" class="w-full px-3 py-2 border rounded-lg focus:ring-primary outline-none"><option value="karu">Ketua Regu (KARU)</option><option value="panitia">Panitia (Admin Pusat)</option></select></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Username</label><div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-user"></i></span><input type="text" id="loginUsername" required class="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-primary outline-none"></div></div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                         <div class="relative">
@@ -373,10 +366,9 @@
                     <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-2.5 rounded-lg font-semibold mt-4 transition shadow">Masuk Sekarang</button>
                 </form>
 
-                <!-- Form Register -->
                 <form id="formRegister" class="space-y-4 hidden" onsubmit="handleRegister(event)">
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label><input type="text" id="regNama" required class="w-full px-3 py-2 border rounded-lg focus:ring-primary outline-none"></div>
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Regu (Kloter)</label><input type="text" id="regKloter" placeholder="Contoh: JKG-12 Regu 1" required class="w-full px-3 py-2 border rounded-lg focus:ring-primary outline-none"></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Regu (Kloter)</label><input type="text" id="regKloter" placeholder="Cth: JKG-12 Regu 1" required class="w-full px-3 py-2 border rounded-lg focus:ring-primary outline-none"></div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Username</label><input type="text" id="regUsername" required class="w-full px-3 py-2 border rounded-lg focus:ring-primary outline-none"></div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -391,7 +383,7 @@
         </div>
     </div>
 
-    <!-- Modal Form Jamaah (CRUD) -->
+    <!-- MODAL JAMAAH CRUD -->
     <div id="modalJamaah" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center backdrop-blur-sm p-4 overflow-y-auto">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden my-8">
             <div class="bg-indigo-600 px-4 py-3 flex justify-between items-center text-white">
@@ -401,27 +393,16 @@
             <form id="formJamaah" class="p-4 md:p-6 space-y-4" onsubmit="saveJamaah(event)">
                 <input type="hidden" id="jamId">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label class="block text-sm font-medium text-gray-700">Rombongan</label><input type="number" id="jamRombongan" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 1" required></div>
-                    <div><label class="block text-sm font-medium text-gray-700">Regu</label><input type="number" id="jamRegu" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 2" required></div>
-                    
-                    <div><label class="block text-sm font-medium text-gray-700">Nomor Urut</label><input type="number" id="jamNoUrut" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 14" required></div>
-                    <div><label class="block text-sm font-medium text-gray-700">Nomor Porsi</label><input type="text" id="jamPorsi" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" placeholder="Cth: 100012345" required></div>
-                    
+                    <div><label class="block text-sm font-medium text-gray-700">Rombongan</label><input type="number" id="jamRombongan" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Regu</label><input type="number" id="jamRegu" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Nomor Urut</label><input type="number" id="jamNoUrut" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Nomor Porsi</label><input type="text" id="jamPorsi" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></div>
                     <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700">Nama Lengkap</label><input type="text" id="jamNama" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></div>
-                    
                     <div><label class="block text-sm font-medium text-gray-700">Tanggal Lahir</label><input type="date" id="jamTglLahir" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                        <select id="jamJk" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required>
-                            <option value="L">Laki-laki (L)</option>
-                            <option value="P">Perempuan (P)</option>
-                        </select>
-                    </div>
-
+                    <div><label class="block text-sm font-medium text-gray-700">Jenis Kelamin</label><select id="jamJk" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required><option value="L">L</option><option value="P">P</option></select></div>
                     <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700">Alamat</label><textarea id="jamAlamat" rows="2" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500" required></textarea></div>
                     <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700">No Telepon</label><input type="text" id="jamTelepon" class="w-full border rounded px-3 py-2 mt-1 outline-none focus:ring-indigo-500"></div>
                 </div>
-                
                 <div class="flex justify-end space-x-2 pt-4 border-t mt-4">
                     <button type="button" onclick="closeModalJamaah()" class="bg-gray-200 px-4 py-2 rounded text-sm text-gray-700">Batal</button>
                     <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded text-sm font-medium shadow">Simpan</button>
@@ -439,74 +420,50 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycby3Q2b-Mf6ukm5ggCVYnwKkOv7Qn2nPCGjspccUOaQe7HtkzQZImF23P1nkmfneQp2t/exec"; 
 
-        // --- STATE ---
         let reports = [];
         let registeredUsers = []; 
-        let jamaahData = []; // Data Master Jamaah
+        let jamaahData = []; 
         let currentUser = null; 
         let chartInstances = { publicPie: null, publicDonut: null, adminPie: null, adminDonut: null };
         let autoRefreshInterval = null; 
 
-        // INIT
         window.onload = async () => {
             renderJamaahTableComponent('containerJamaahBeranda', 'brnd', true);
             renderJamaahTableComponent('containerJamaahAdmin', 'adm', false);
             setDefaultDateForm();
-            
             await fetchDataFromAPI(false);
         };
 
         async function fetchDataFromAPI(isSilent = false) {
             if (!API_URL) return updateConnectionStatus('error', 'URL Kosong');
-            
             updateConnectionStatus('loading', 'Menghubungkan');
             try {
                 const response = await fetch(API_URL);
                 const res = await response.json();
                 if (res.status === 'success') {
-                    reports = res.data.map(item => ({ 
-                        ...item, 
-                        id: parseInt(item.id), 
-                        tanggal_submit: item.tanggal_submit || item.tanggal || new Date().toISOString() 
-                    }));
+                    reports = res.data.map(item => ({ ...item, id: parseInt(item.id), tanggal_submit: item.tanggal_submit || item.tanggal || new Date().toISOString() }));
                     if (res.users) registeredUsers = res.users;
-                    if (res.jamaah) {
-                        jamaahData = res.jamaah.map(j => ({
-                            ...j,
-                            tgl_lahir: j.tgl_lahir ? j.tgl_lahir.toString().split('T')[0] : '-'
-                        }));
-                    }
+                    if (res.jamaah) jamaahData = res.jamaah.map(j => ({ ...j, tgl_lahir: j.tgl_lahir ? j.tgl_lahir.toString().split('T')[0] : '-' }));
                     
-                    updateStatistics();
-                    populateRomReg();
-                    renderLaporanTable();
-                    renderAllJamaahTables();
-                    
+                    updateStatistics(); populateRomReg(); renderLaporanTable(); renderAllJamaahTables();
                     updateConnectionStatus('success', 'Terhubung');
                     if (!isSilent) showToast('Data berhasil dimuat', 'success');
-                } else {
-                    updateConnectionStatus('error', 'Gagal Sinkron');
-                }
-            } catch (e) { 
-                console.error("Gagal load API", e); 
-                updateConnectionStatus('error', 'Terputus');
-            }
+                } else { updateConnectionStatus('error', 'Gagal Sinkron'); }
+            } catch (e) { updateConnectionStatus('error', 'Terputus'); }
         }
 
         function updateConnectionStatus(status, text) {
             const dot = document.getElementById('connStatusDot');
             const textEl = document.getElementById('connStatusText');
-            
             dot.className = 'fas fa-circle text-[10px] sm:text-xs transition-colors ';
-            if (status === 'loading') { dot.classList.add('text-yellow-500', 'animate-pulse'); } 
-            else if (status === 'success') { dot.classList.add('text-green-500'); } 
-            else if (status === 'error') { dot.classList.add('text-red-500'); }
+            if (status === 'loading') dot.classList.add('text-yellow-500', 'animate-pulse');
+            else if (status === 'success') dot.classList.add('text-green-500');
+            else if (status === 'error') dot.classList.add('text-red-500');
             if (textEl) textEl.innerText = text;
         }
 
         function toggleAutoRefresh() {
-            const isChecked = document.getElementById('autoRefreshToggle').checked;
-            if (isChecked) {
+            if (document.getElementById('autoRefreshToggle').checked) {
                 autoRefreshInterval = setInterval(() => { fetchDataFromAPI(true); }, 10000);
                 showToast('Auto Refresh 10 detik diaktifkan', 'info');
             } else {
@@ -517,13 +474,9 @@
 
         function setDefaultDateForm() {
             const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            document.getElementById('inpHariTanggal').value = `${year}-${month}-${day}`;
+            document.getElementById('inpHariTanggal').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         }
 
-        // --- AUTH & NAVIGATION ---
         function switchPage(pageId) {
             document.getElementById('page-landing').classList.add('hidden');
             document.getElementById('page-formKaru').classList.add('hidden');
@@ -534,10 +487,8 @@
             document.querySelectorAll('.nav-link-mobile').forEach(el => { el.classList.remove('text-primary'); el.classList.add('text-gray-500'); });
 
             const desktopId = pageId === 'landing' ? 'navHome' : pageId === 'formKaru' ? 'navKaru' : 'navPanitia';
-            const mobileId = desktopId + 'Mobile';
             document.getElementById(desktopId).classList.add('text-primary');
-            document.getElementById(mobileId).classList.add('text-primary');
-
+            document.getElementById(desktopId + 'Mobile').classList.add('text-primary');
             if(pageId === 'panitiaDash' || pageId === 'landing') { updateStatistics(); renderAllJamaahTables(); renderLaporanTable(); }
             window.scrollTo(0, 0);
         }
@@ -552,286 +503,130 @@
             document.getElementById('tabRegister').classList.toggle('tab-active', tab === 'register');
         }
 
-        function togglePassword(inputId, iconId) {
-            const input = document.getElementById(inputId);
-            const icon = document.getElementById(iconId);
-            if(input.type === 'password') { input.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); } 
-            else { input.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+        function togglePassword(inp, icn) {
+            const i = document.getElementById(inp), c = document.getElementById(icn);
+            if(i.type === 'password') { i.type = 'text'; c.classList.replace('fa-eye', 'fa-eye-slash'); } 
+            else { i.type = 'password'; c.classList.replace('fa-eye-slash', 'fa-eye'); }
         }
 
         function handleLogin(e) {
             e.preventDefault();
-            const user = document.getElementById('loginUsername').value.toLowerCase();
-            const pass = document.getElementById('loginPassword').value;
-            const role = document.getElementById('loginRole').value; 
+            const user = document.getElementById('loginUsername').value.toLowerCase(), pass = document.getElementById('loginPassword').value, role = document.getElementById('loginRole').value; 
             
-            if (user === 'admin' && pass === '123' && role === 'panitia') {
-                currentUser = { role: 'panitia', name: 'Admin Panitia' };
-            } else {
-                const foundUser = registeredUsers.find(u => u.username.toLowerCase() === user && u.password === pass);
-                if (!foundUser) { return showToast('Username atau Password salah!', 'error'); }
-                if (foundUser.role !== role) { return showToast(`Akun ini tidak memiliki akses sebagai ${role}!`, 'error'); }
-                currentUser = { role: foundUser.role, name: foundUser.nama };
+            if (user === 'admin' && pass === '123' && role === 'panitia') { currentUser = { role: 'panitia', name: 'Admin Panitia' }; } 
+            else {
+                const found = registeredUsers.find(u => u.username.toLowerCase() === user && u.password === pass);
+                if (!found) return showToast('Username/Password salah!', 'error');
+                if (found.role !== role) return showToast(`Bukan akun ${role}!`, 'error');
+                currentUser = { role: found.role, name: found.nama };
             }
-
-            closeLoginModal(); updateUIByAuth();
-            showToast(`Selamat datang, ${currentUser.name}`, 'success');
+            closeLoginModal(); updateUIByAuth(); showToast(`Selamat datang, ${currentUser.name}`, 'success');
             if(currentUser.role === 'panitia') switchPage('panitiaDash'); else switchPage('formKaru');
         }
 
         async function handleRegister(e) {
             e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerText = 'Mendaftar...'; btn.disabled = true;
-
-            const newUser = {
-                id: Date.now(), nama: document.getElementById('regNama').value, kloter: document.getElementById('regKloter').value,
-                username: document.getElementById('regUsername').value.toLowerCase(), password: document.getElementById('regPassword').value,
-                role: 'karu'
-            };
-
-            if(registeredUsers.find(u => u.username === newUser.username)) {
-                btn.innerText = 'Daftar Akun KARU'; btn.disabled = false;
-                return showToast('Username sudah digunakan!', 'error');
-            }
-
+            const btn = e.target.querySelector('button[type="submit"]'); btn.innerText = 'Mendaftar...'; btn.disabled = true;
+            const newUser = { id: Date.now(), nama: document.getElementById('regNama').value, kloter: document.getElementById('regKloter').value, username: document.getElementById('regUsername').value.toLowerCase(), password: document.getElementById('regPassword').value, role: 'karu' };
+            if(registeredUsers.find(u => u.username === newUser.username)) { btn.innerText = 'Daftar Akun'; btn.disabled = false; return showToast('Username dipakai!', 'error'); }
             registeredUsers.push(newUser);
             if (API_URL) {
-                try {
-                    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'register', data: newUser }) });
-                    showToast('Pendaftaran KARU berhasil! Silakan login.', 'success');
-                    e.target.reset(); switchAuthTab('login');
-                } catch (err) { showToast('Gagal mendaftar ke spreadsheet', 'error'); }
+                try { await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'register', data: newUser }) }); showToast('Daftar berhasil! Silakan login.', 'success'); e.target.reset(); switchAuthTab('login'); } 
+                catch (err) { showToast('Gagal server', 'error'); }
             }
-            btn.innerText = 'Daftar Akun KARU'; btn.disabled = false;
+            btn.innerText = 'Daftar Akun'; btn.disabled = false;
         }
 
-        function logout() { currentUser = null; updateUIByAuth(); switchPage('landing'); showToast('Anda telah logout', 'info'); }
+        function logout() { currentUser = null; updateUIByAuth(); switchPage('landing'); showToast('Logout', 'info'); }
 
         function updateUIByAuth() {
-            const btnLogin = document.getElementById('btnLoginMain');
-            const userProfile = document.getElementById('userProfile');
-            const userNameDisplay = document.getElementById('userNameDisplay');
+            const btnLogin = document.getElementById('btnLoginMain'), userProfile = document.getElementById('userProfile'), userNameDisplay = document.getElementById('userNameDisplay');
             const navs = ['navKaru', 'navPanitia', 'navKaruMobile', 'navPanitiaMobile'];
-
             if(currentUser) {
-                btnLogin.classList.add('hidden'); userProfile.classList.remove('hidden'); userProfile.classList.add('flex');
-                userNameDisplay.innerText = currentUser.name;
-                
+                btnLogin.classList.add('hidden'); userProfile.classList.remove('hidden'); userProfile.classList.add('flex'); userNameDisplay.innerText = currentUser.name;
                 navs.forEach(id => document.getElementById(id).classList.add('hidden'));
-                if(currentUser.role === 'karu') {
-                    document.getElementById('navKaru').classList.remove('hidden');
-                    document.getElementById('navKaruMobile').classList.replace('hidden', 'flex');
-                } else {
-                    document.getElementById('navPanitia').classList.remove('hidden');
-                    document.getElementById('navPanitiaMobile').classList.replace('hidden', 'flex');
-                }
+                if(currentUser.role === 'karu') { document.getElementById('navKaru').classList.remove('hidden'); document.getElementById('navKaruMobile').classList.replace('hidden', 'flex'); } 
+                else { document.getElementById('navPanitia').classList.remove('hidden'); document.getElementById('navPanitiaMobile').classList.replace('hidden', 'flex'); }
             } else {
                 btnLogin.classList.remove('hidden'); userProfile.classList.replace('flex', 'hidden');
                 navs.forEach(id => { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); });
             }
-            renderAllJamaahTables();
         }
 
-        // ================= FITUR DATA JAMAAH (EXCEL & CRUD) =================
+        // ================= FITUR DATA JAMAAH =================
         function populateRomReg() {
-            const romSelect = document.getElementById('inpRombongan');
-            const filterRom = document.getElementById('filterRombongan');
-            const filterReg = document.getElementById('filterRegu');
-
+            const romSelect = document.getElementById('inpRombongan'), filterRom = document.getElementById('filterRombongan'), filterReg = document.getElementById('filterRegu');
             const uniqueRom = [...new Set(jamaahData.map(j => parseInt(j.rombongan)).filter(n => !isNaN(n)))].sort((a,b) => a - b);
             const uniqueReg = [...new Set(jamaahData.map(j => parseInt(j.regu)).filter(n => !isNaN(n)))].sort((a,b) => a - b);
-
-            if(romSelect) {
-                let romOptions = '<option value="">-- Pilih Rombongan --</option>';
-                uniqueRom.forEach(r => romOptions += `<option value="${r}">Rombongan ${r}</option>`);
-                romSelect.innerHTML = romOptions;
-            }
-
-            if(filterRom) {
-                let fRomOptions = '<option value="">Semua Rom</option>';
-                uniqueRom.forEach(r => fRomOptions += `<option value="${r}">Rom ${r}</option>`);
-                filterRom.innerHTML = fRomOptions;
-            }
-            if(filterReg) {
-                let fRegOptions = '<option value="">Semua Regu</option>';
-                uniqueReg.forEach(r => fRegOptions += `<option value="${r}">Regu ${r}</option>`);
-                filterReg.innerHTML = fRegOptions;
-            }
+            if(romSelect) { let romOptions = '<option value="">-- Pilih Rombongan --</option>'; uniqueRom.forEach(r => romOptions += `<option value="${r}">Rombongan ${r}</option>`); romSelect.innerHTML = romOptions; }
+            if(filterRom) { let fRomOptions = '<option value="">Semua Rom</option>'; uniqueRom.forEach(r => fRomOptions += `<option value="${r}">Rom ${r}</option>`); filterRom.innerHTML = fRomOptions; }
+            if(filterReg) { let fRegOptions = '<option value="">Semua Regu</option>'; uniqueReg.forEach(r => fRegOptions += `<option value="${r}">Regu ${r}</option>`); filterReg.innerHTML = fRegOptions; }
         }
 
         function handleRombonganChange() {
-            const romVal = document.getElementById('inpRombongan').value;
-            const regSelect = document.getElementById('inpRegu');
-            
+            const romVal = document.getElementById('inpRombongan').value, regSelect = document.getElementById('inpRegu');
             let regOptions = '<option value="">-- Pilih Regu --</option>';
             if (romVal) {
                 const rom = parseInt(romVal);
-                if (!isNaN(rom)) {
-                    const startRegu = (rom * 4) - 3;
-                    const endRegu = rom * 4;
-                    for (let i = startRegu; i <= endRegu; i++) {
-                        regOptions += `<option value="${i}">Regu ${i}</option>`;
-                    }
-                } else {
-                    const regs = [...new Set(jamaahData.filter(j => j.rombongan == romVal).map(j => j.regu).filter(Boolean))].sort();
-                    regs.forEach(r => regOptions += `<option value="${r}">Regu ${r}</option>`);
-                }
-            } else {
-                regOptions = '<option value="">-- Pilih Rombongan Dulu --</option>';
-            }
-            regSelect.innerHTML = regOptions;
-            filterNamaByRomReg();
+                if (!isNaN(rom)) { for (let i = (rom*4)-3; i <= rom*4; i++) { regOptions += `<option value="${i}">Regu ${i}</option>`; } } 
+                else { [...new Set(jamaahData.filter(j => j.rombongan == romVal).map(j => j.regu).filter(Boolean))].sort().forEach(r => regOptions += `<option value="${r}">Regu ${r}</option>`); }
+            } else { regOptions = '<option value="">-- Pilih Rombongan Dulu --</option>'; }
+            regSelect.innerHTML = regOptions; filterNamaByRomReg();
         }
 
         function filterNamaByRomReg() {
-            const rom = document.getElementById('inpRombongan').value;
-            const reg = document.getElementById('inpRegu').value;
-            const select = document.getElementById('inpNama');
+            const rom = document.getElementById('inpRombongan').value, reg = document.getElementById('inpRegu').value, select = document.getElementById('inpNama');
             if(!select) return;
-
             let filteredJamaah = jamaahData;
             if(rom) filteredJamaah = filteredJamaah.filter(j => j.rombongan == rom);
             if(reg) filteredJamaah = filteredJamaah.filter(j => j.regu == reg);
-
             let options = '<option value="">-- Pilih Jemaah --</option>';
-            if (!rom && !reg) {
-                options = '<option value="">-- Pilih Regu Dulu --</option>';
-            } else {
-                const sortedJamaah = [...filteredJamaah].sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
-                sortedJamaah.forEach(j => {
-                    options += `<option value="${j.nama}" data-porsi="${j.porsi}">${j.nama}</option>`;
-                });
-            }
-            select.innerHTML = options;
-            autoFillPorsi(); 
+            if (!rom && !reg) { options = '<option value="">-- Pilih Regu Dulu --</option>'; } 
+            else { [...filteredJamaah].sort((a,b) => (a.nama||'').localeCompare(b.nama||'')).forEach(j => { options += `<option value="${j.nama}" data-porsi="${j.porsi}">${j.nama}</option>`; }); }
+            select.innerHTML = options; autoFillPorsi(); 
         }
 
         function autoFillPorsi() {
-            const select = document.getElementById('inpNama');
-            if (select.selectedIndex === -1) return;
-            const selectedOption = select.options[select.selectedIndex];
-            const porsi = selectedOption.getAttribute('data-porsi') || '';
-            document.getElementById('inpNoPorsi').value = porsi;
+            const select = document.getElementById('inpNama'); if (select.selectedIndex === -1) return;
+            document.getElementById('inpNoPorsi').value = select.options[select.selectedIndex].getAttribute('data-porsi') || '';
         }
 
         function renderJamaahTableComponent(containerId, prefix, isPublic = false) {
             let toolbar = ''; let aksiHeader = '';
             if (isPublic) {
-                toolbar = `
-                <div class="p-3 md:p-4 border-b bg-gray-50 flex flex-col md:flex-row justify-end items-center gap-3">
-                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                        <div class="relative w-full sm:w-auto"><i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i><input type="text" id="searchJam_${prefix}" onkeyup="renderAllJamaahTables()" placeholder="Cari Nama/Porsi/Regu..." class="pl-9 pr-4 py-2 border rounded-md text-sm outline-none w-full md:w-64"></div>
-                        <select id="sortJam_${prefix}" onchange="renderAllJamaahTables()" class="border rounded-md px-3 py-2 text-sm outline-none w-full sm:w-auto">
-                            <option value="nama_asc">Nama A-Z</option><option value="nama_desc">Nama Z-A</option><option value="regu">Regu</option>
-                        </select>
-                    </div>
-                </div>`;
+                toolbar = `<div class="p-3 md:p-4 border-b bg-gray-50 flex flex-col sm:flex-row justify-end gap-2"><div class="relative w-full sm:w-auto"><i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i><input type="text" id="searchJam_${prefix}" onkeyup="renderAllJamaahTables()" placeholder="Cari Jamaah..." class="pl-9 pr-4 py-2 border rounded-md text-sm outline-none w-full md:w-64"></div><select id="sortJam_${prefix}" onchange="renderAllJamaahTables()" class="border rounded-md px-3 py-2 text-sm outline-none w-full sm:w-auto"><option value="nama_asc">A-Z</option><option value="nama_desc">Z-A</option><option value="regu">Regu</option></select></div>`;
             } else {
-                toolbar = `
-                <div class="p-3 md:p-4 border-b bg-gray-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
-                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                        <button onclick="downloadTemplateJamaah()" class="flex-1 md:flex-none justify-center bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-3 py-2 rounded text-xs md:text-sm font-medium transition flex items-center"><i class="fas fa-file-excel mr-1"></i> Template</button>
-                        <button onclick="document.getElementById('importJamaahFile').click()" class="flex-1 md:flex-none justify-center bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-2 rounded text-xs md:text-sm font-medium transition flex items-center"><i class="fas fa-upload mr-1"></i> Import</button>
-                        <button onclick="exportJamaahExcel()" class="flex-1 md:flex-none justify-center bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-2 rounded text-xs md:text-sm font-medium transition flex items-center"><i class="fas fa-download mr-1"></i> Export</button>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                        <div class="relative w-full sm:w-auto"><i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i><input type="text" id="searchJam_${prefix}" onkeyup="renderAllJamaahTables()" placeholder="Cari Nama/Porsi/Regu..." class="pl-9 pr-4 py-2 border rounded-md text-sm outline-none w-full md:w-48"></div>
-                        <div class="flex gap-2 w-full sm:w-auto">
-                            <select id="sortJam_${prefix}" onchange="renderAllJamaahTables()" class="flex-1 border rounded-md px-2 py-2 text-sm outline-none">
-                                <option value="nama_asc">A-Z</option><option value="nama_desc">Z-A</option><option value="regu">Regu</option>
-                            </select>
-                            <button onclick="openModalJamaah()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium transition"><i class="fas fa-plus mr-1"></i> Tambah</button>
-                        </div>
-                    </div>
-                </div>`;
-                aksiHeader = '<th class="px-4 py-3 md:px-6 md:py-3 text-center sticky right-0 top-0 bg-gray-200 z-20 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">Aksi</th>';
+                toolbar = `<div class="p-3 md:p-4 border-b bg-gray-50 flex flex-col md:flex-row justify-between gap-3"><div class="flex gap-2"><button onclick="downloadTemplateJamaah()" class="bg-emerald-100 text-emerald-700 px-3 py-2 rounded text-xs"><i class="fas fa-file-excel"></i> Template</button><button onclick="document.getElementById('importJamaahFile').click()" class="bg-blue-100 text-blue-700 px-3 py-2 rounded text-xs"><i class="fas fa-upload"></i> Import</button><button onclick="exportJamaahExcel()" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded text-xs"><i class="fas fa-download"></i> Export</button></div><div class="flex gap-2"><div class="relative"><i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i><input type="text" id="searchJam_${prefix}" onkeyup="renderAllJamaahTables()" placeholder="Cari..." class="pl-9 pr-4 py-2 border rounded-md text-sm w-full md:w-48"></div><select id="sortJam_${prefix}" onchange="renderAllJamaahTables()" class="border rounded-md px-2 py-2 text-sm outline-none"><option value="nama_asc">A-Z</option><option value="nama_desc">Z-A</option><option value="regu">Regu</option></select><button onclick="openModalJamaah()" class="bg-indigo-600 text-white px-3 py-2 rounded-md text-sm"><i class="fas fa-plus"></i> Tambah</button></div></div>`;
+                aksiHeader = '<th class="px-4 py-3 sticky right-0 top-0 bg-gray-200 z-20 shadow-[-2px_0_4px_rgba(0,0,0,0.05)] text-center">Aksi</th>';
             }
-
-            document.getElementById(containerId).innerHTML = `
-                ${toolbar}
-                <div class="overflow-x-auto overflow-y-auto relative max-h-[500px]">
-                    <table class="w-full whitespace-nowrap text-xs md:text-sm">
-                        <thead class="text-gray-600 uppercase text-left text-[10px] md:text-xs">
-                            <tr>
-                                <th class="px-4 py-3 md:px-6 md:py-3 sticky top-0 bg-gray-100 z-10 shadow-sm">Rombongan</th>
-                                <th class="px-4 py-3 md:px-6 md:py-3 sticky top-0 bg-gray-100 z-10 shadow-sm">Regu</th>
-                                <th class="px-4 py-3 md:px-6 md:py-3 sticky top-0 bg-gray-100 z-10 shadow-sm">No Urut</th>
-                                <th class="px-4 py-3 md:px-6 md:py-3 sticky top-0 bg-gray-100 z-10 shadow-sm">No Porsi</th>
-                                <th class="px-4 py-3 md:px-6 md:py-3 sticky top-0 bg-gray-100 z-10 shadow-sm">Nama Lengkap</th>
-                                <th class="px-4 py-3 md:px-6 md:py-3 sticky top-0 bg-gray-100 z-10 shadow-sm">Tgl Lahir</th>
-                                <th class="px-4 py-3 md:px-6 md:py-3 sticky top-0 bg-gray-100 z-10 shadow-sm">L/P</th>
-                                <th class="px-4 py-3 md:px-6 md:py-3 sticky top-0 bg-gray-100 z-10 shadow-sm">Alamat</th>
-                                <th class="px-4 py-3 md:px-6 md:py-3 sticky top-0 bg-gray-100 z-10 shadow-sm">No Telp</th>
-                                ${aksiHeader}
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyJam_${prefix}" class="divide-y divide-gray-200"></tbody>
-                    </table>
-                </div>
-            `;
+            document.getElementById(containerId).innerHTML = `${toolbar}<div class="overflow-x-auto overflow-y-auto relative max-h-[500px]"><table class="w-full whitespace-nowrap text-xs md:text-sm"><thead class="text-gray-600 uppercase text-left text-[10px] md:text-xs"><tr><th class="px-4 py-3 sticky top-0 bg-gray-100 z-10">Rombongan</th><th class="px-4 py-3 sticky top-0 bg-gray-100 z-10">Regu</th><th class="px-4 py-3 sticky top-0 bg-gray-100 z-10">No Urut</th><th class="px-4 py-3 sticky top-0 bg-gray-100 z-10">No Porsi</th><th class="px-4 py-3 sticky top-0 bg-gray-100 z-10">Nama Lengkap</th><th class="px-4 py-3 sticky top-0 bg-gray-100 z-10">Tgl Lahir</th><th class="px-4 py-3 sticky top-0 bg-gray-100 z-10">L/P</th><th class="px-4 py-3 sticky top-0 bg-gray-100 z-10">Alamat</th><th class="px-4 py-3 sticky top-0 bg-gray-100 z-10">No Telp</th>${aksiHeader}</tr></thead><tbody id="tbodyJam_${prefix}" class="divide-y divide-gray-200"></tbody></table></div>`;
         }
 
         function renderAllJamaahTables() {
             ['brnd', 'adm'].forEach(prefix => {
-                const tbody = document.getElementById(`tbodyJam_${prefix}`);
-                if(!tbody) return;
-                const search = document.getElementById(`searchJam_${prefix}`).value.toLowerCase();
-                const sort = document.getElementById(`sortJam_${prefix}`).value;
+                const tbody = document.getElementById(`tbodyJam_${prefix}`); if(!tbody) return;
+                const searchEl = document.getElementById(`searchJam_${prefix}`);
+                const sortEl = document.getElementById(`sortJam_${prefix}`);
                 
-                let data = jamaahData.filter(j => 
-                    (j.nama || '').toLowerCase().includes(search) || 
-                    (j.porsi || '').toString().includes(search) || 
-                    (j.rombongan || '').toString().includes(search) ||
-                    (j.regu || '').toString().includes(search) ||
-                    (j.telepon || '').toString().includes(search)
-                );
+                const search = searchEl ? searchEl.value.toLowerCase() : '';
+                const sort = sortEl ? sortEl.value : 'nama_asc';
 
+                let data = jamaahData.filter(j => (j.nama||'').toLowerCase().includes(search) || (j.porsi||'').toString().includes(search) || (j.rombongan||'').toString().includes(search) || (j.regu||'').toString().includes(search));
                 data.sort((a, b) => sort === 'nama_asc' ? (a.nama||'').localeCompare(b.nama||'') : (sort === 'nama_desc' ? (b.nama||'').localeCompare(a.nama||'') : (a.regu||'').toString().localeCompare((b.regu||'').toString())));
-
                 const isPublic = prefix === 'brnd';
-                const colspan = isPublic ? 9 : 10;
-
-                tbody.innerHTML = data.length === 0 ? `<tr><td colspan="${colspan}" class="text-center py-6 text-gray-500">Data Jamaah Kosong</td></tr>` : 
-                    data.map((j) => `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 md:px-6 md:py-3 text-gray-600">${j.rombongan || '-'}</td>
-                        <td class="px-4 py-3 md:px-6 md:py-3 text-gray-600">${j.regu || '-'}</td>
-                        <td class="px-4 py-3 md:px-6 md:py-3 text-gray-500">${j.no_urut || '-'}</td>
-                        <td class="px-4 py-3 md:px-6 md:py-3 text-gray-600">${j.porsi || '-'}</td>
-                        <td class="px-4 py-3 md:px-6 md:py-3 font-medium text-gray-900">${j.nama || '-'}</td>
-                        <td class="px-4 py-3 md:px-6 md:py-3 text-gray-600">${(j.tgl_lahir || '').toString().split('T')[0] || '-'}</td>
-                        <td class="px-4 py-3 md:px-6 md:py-3">${j.jk || '-'}</td>
-                        <td class="px-4 py-3 md:px-6 md:py-3 text-gray-600 truncate max-w-[150px]" title="${j.alamat || ''}">${j.alamat || '-'}</td>
-                        <td class="px-4 py-3 md:px-6 md:py-3 text-gray-600">${j.telepon || '-'}</td>
-                        ${!isPublic ? `
-                        <td class="px-4 py-3 md:px-6 md:py-3 text-center sticky right-0 bg-white/90 backdrop-blur shadow-[-2px_0_4px_rgba(0,0,0,0.05)] z-10">
-                            <button onclick="editJamaah(${j.id})" class="text-blue-500 hover:text-blue-700 px-1 md:px-2" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteJamaah(${j.id})" class="text-red-500 hover:text-red-700 px-1 md:px-2" title="Hapus"><i class="fas fa-trash"></i></button>
-                        </td>` : ''}
-                    </tr>`).join('');
+                tbody.innerHTML = data.length === 0 ? `<tr><td colspan="${isPublic?9:10}" class="text-center py-6 text-gray-500">Kosong</td></tr>` : data.map((j) => `<tr class="hover:bg-gray-50"><td class="px-4 py-3">${j.rombongan||'-'}</td><td class="px-4 py-3">${j.regu||'-'}</td><td class="px-4 py-3">${j.no_urut||'-'}</td><td class="px-4 py-3">${j.porsi||'-'}</td><td class="px-4 py-3 font-medium">${j.nama||'-'}</td><td class="px-4 py-3">${(j.tgl_lahir||'').toString().split('T')[0]||'-'}</td><td class="px-4 py-3">${j.jk||'-'}</td><td class="px-4 py-3 truncate max-w-[150px]">${j.alamat||'-'}</td><td class="px-4 py-3">${j.telepon||'-'}</td>${!isPublic ? `<td class="px-4 py-3 text-center sticky right-0 bg-white/90 z-10"><button onclick="editJamaah(${j.id})" class="text-blue-500 px-1"><i class="fas fa-edit"></i></button><button onclick="deleteJamaah(${j.id})" class="text-red-500 px-1"><i class="fas fa-trash"></i></button></td>` : ''}</tr>`).join('');
             });
             populateRomReg(); 
         }
 
         function openModalJamaah(id = null) {
-            document.getElementById('formJamaah').reset();
-            document.getElementById('jamId').value = '';
-            document.getElementById('titleModalJamaah').innerText = 'Tambah Data Jamaah';
+            document.getElementById('formJamaah').reset(); document.getElementById('jamId').value = ''; document.getElementById('titleModalJamaah').innerText = 'Tambah Data';
             if(id) {
                 const j = jamaahData.find(x => x.id === id);
                 if(j) {
-                    document.getElementById('jamId').value = j.id;
-                    document.getElementById('jamRombongan').value = j.rombongan || '';
-                    document.getElementById('jamRegu').value = j.regu || '';
-                    document.getElementById('jamNoUrut').value = j.no_urut || '';
-                    document.getElementById('jamPorsi').value = j.porsi || '';
-                    document.getElementById('jamNama').value = j.nama || '';
+                    ['jamId','jamRombongan','jamRegu','jamNoUrut','jamPorsi','jamNama','jamJk','jamAlamat','jamTelepon'].forEach(k => document.getElementById(k).value = j[k.replace('jam','').toLowerCase()] || '');
                     document.getElementById('jamTglLahir').value = (j.tgl_lahir || '').toString().split('T')[0] || '';
-                    document.getElementById('jamJk').value = j.jk || 'L';
-                    document.getElementById('jamAlamat').value = j.alamat || '';
-                    document.getElementById('jamTelepon').value = j.telepon || '';
-                    document.getElementById('titleModalJamaah').innerText = 'Edit Data Jamaah';
+                    document.getElementById('titleModalJamaah').innerText = 'Edit Data';
                 }
             }
             document.getElementById('modalJamaah').classList.add('modal-active');
@@ -842,115 +637,48 @@
         async function saveJamaah(e) {
             e.preventDefault();
             const idVal = document.getElementById('jamId').value;
-            const newData = {
-                id: idVal ? parseFloat(idVal) : Date.now(),
-                rombongan: document.getElementById('jamRombongan').value, 
-                regu: document.getElementById('jamRegu').value,
-                no_urut: document.getElementById('jamNoUrut').value, 
-                porsi: document.getElementById('jamPorsi').value,
-                nama: document.getElementById('jamNama').value, 
-                tgl_lahir: document.getElementById('jamTglLahir').value, 
-                jk: document.getElementById('jamJk').value,
-                alamat: document.getElementById('jamAlamat').value, 
-                telepon: document.getElementById('jamTelepon').value
-            };
+            const newData = { id: idVal ? parseFloat(idVal) : Date.now(), rombongan: document.getElementById('jamRombongan').value, regu: document.getElementById('jamRegu').value, no_urut: document.getElementById('jamNoUrut').value, porsi: document.getElementById('jamPorsi').value, nama: document.getElementById('jamNama').value, tgl_lahir: document.getElementById('jamTglLahir').value, jk: document.getElementById('jamJk').value, alamat: document.getElementById('jamAlamat').value, telepon: document.getElementById('jamTelepon').value };
+            if (idVal) { const idx = jamaahData.findIndex(x => x.id == idVal); if(idx > -1) jamaahData[idx] = newData; if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateJamaah', data: newData }) }); } 
+            else { jamaahData.push(newData); if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'createJamaah', data: newData }) }); }
+            closeModalJamaah(); renderAllJamaahTables(); showToast('Tersimpan', 'success');
+        }
+        function deleteJamaah(id) { if(!confirm('Hapus data?')) return; jamaahData = jamaahData.filter(j => j.id !== id); renderAllJamaahTables(); showToast('Dihapus', 'info'); if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteJamaah', id: id }) }); }
 
-            if (idVal) {
-                const idx = jamaahData.findIndex(x => x.id == idVal);
-                if(idx > -1) jamaahData[idx] = newData;
-                if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'updateJamaah', data: newData }) });
-            } else {
-                jamaahData.push(newData);
-                if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'createJamaah', data: newData }) });
-            }
-            closeModalJamaah(); renderAllJamaahTables(); showToast('Data Jamaah Tersimpan', 'success');
-        }
-
-        function deleteJamaah(id) {
-            if(!confirm('Hapus data jamaah ini?')) return;
-            jamaahData = jamaahData.filter(j => j.id !== id);
-            renderAllJamaahTables(); showToast('Data dihapus', 'info');
-            if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteJamaah', id: id }) });
-        }
-
-        function downloadTemplateJamaah() {
-            const ws = XLSX.utils.json_to_sheet([{ 
-                "Rombongan": "1", "Regu": "2", "Nomor Urut": "14", "Nomor Porsi": "100012345", 
-                "Nama Lengkap": "Budi Santoso", "Tanggal Lahir": "1970-01-01", "Jenis Kelamin": "L", 
-                "Alamat": "Jl. Merdeka No 1", "No Telepon": "08123456789" 
-            }]);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Template");
-            XLSX.writeFile(wb, "Template_Import_Jamaah.xlsx");
-        }
-        
-        function exportJamaahExcel() {
-            if(jamaahData.length === 0) return showToast('Data kosong', 'error');
-            const dataToExport = jamaahData.map(j => ({ 
-                "Rombongan": j.rombongan, "Regu": j.regu, "Nomor Urut": j.no_urut, "Nomor Porsi": j.porsi, 
-                "Nama Lengkap": j.nama, "Tanggal Lahir": (j.tgl_lahir || '').toString().split('T')[0], 
-                "Jenis Kelamin": j.jk, "Alamat": j.alamat, "No Telepon": j.telepon 
-            }));
-            const ws = XLSX.utils.json_to_sheet(dataToExport);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Data Jamaah");
-            XLSX.writeFile(wb, "Data_Jamaah_Export.xlsx");
-        }
-        
+        function downloadTemplateJamaah() { XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), XLSX.utils.json_to_sheet([{ "Rombongan": "1", "Regu": "2", "Nomor Urut": "14", "Nomor Porsi": "100012345", "Nama Lengkap": "Budi Santoso", "Tanggal Lahir": "1970-01-01", "Jenis Kelamin": "L", "Alamat": "Jl. Merdeka No 1", "No Telepon": "08123456789" }]), "Template"), "Template_Import.xlsx"); }
+        function exportJamaahExcel() { if(jamaahData.length === 0) return showToast('Kosong', 'error'); XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), XLSX.utils.json_to_sheet(jamaahData.map(j => ({ "Rombongan": j.rombongan, "Regu": j.regu, "Nomor Urut": j.no_urut, "Nomor Porsi": j.porsi, "Nama Lengkap": j.nama, "Tanggal Lahir": (j.tgl_lahir || '').toString().split('T')[0], "Jenis Kelamin": j.jk, "Alamat": j.alamat, "No Telepon": j.telepon }))), "Data Jamaah"), "Data_Jamaah.xlsx"); }
         function importJamaahExcel(e) {
-            const file = e.target.files[0]; if(!file) return;
-            showToast('Membaca file Excel...', 'info');
+            const file = e.target.files[0]; if(!file) return; showToast('Membaca file...', 'info');
             const reader = new FileReader();
             reader.onload = async (evt) => {
                 try {
-                    const data = new Uint8Array(evt.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const ws = workbook[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(ws, {raw: false, defval: ""});
-                    if (json.length === 0) { showToast('Gagal: File kosong atau hanya berisi Header', 'error'); e.target.value = ''; return; }
-                    
+                    const json = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(evt.target.result), {type: 'array'}).Sheets[XLSX.read(new Uint8Array(evt.target.result), {type: 'array'}).SheetNames[0]], {raw: false, defval: ""});
+                    if (json.length === 0) { showToast('Kosong/Header doang', 'error'); e.target.value = ''; return; }
                     const newRecords = [];
                     json.forEach((rawRow, index) => {
-                        const row = {};
-                        for (let key in rawRow) { row[key.trim().toLowerCase()] = rawRow[key]; }
-
-                        const namaJam = row['nama lengkap'] || row['nama'] || '';
-                        const porsiJam = row['nomor porsi'] || row['no porsi'] || row['porsi'] || '';
-
-                        if (namaJam !== '' || porsiJam !== '') {
-                            newRecords.push({
-                                id: Date.now() + index, 
-                                rombongan: row['rombongan'] || '-', regu: row['regu'] || '-',
-                                no_urut: row['nomor urut'] || row['no urut'] || '-', porsi: porsiJam || '-',
-                                nama: namaJam || '-', tgl_lahir: (row['tanggal lahir'] || row['tgl lahir'] || '').toString().split('T')[0] || '-', 
-                                jk: row['jenis kelamin'] || row['jk'] || 'L',
-                                alamat: row['alamat'] || '-', telepon: row['no telepon'] || row['telepon'] || '-'
-                            });
-                        }
+                        const row = {}; for (let key in rawRow) { row[key.trim().toLowerCase()] = rawRow[key]; }
+                        const n = row['nama lengkap'] || row['nama'] || '', p = row['nomor porsi'] || row['no porsi'] || row['porsi'] || '';
+                        if (n !== '' || p !== '') newRecords.push({ id: Date.now() + index, rombongan: row['rombongan'] || '-', regu: row['regu'] || '-', no_urut: row['nomor urut'] || row['no urut'] || '-', porsi: p || '-', nama: n || '-', tgl_lahir: (row['tanggal lahir'] || row['tgl lahir'] || '').toString().split('T')[0] || '-', jk: row['jenis kelamin'] || row['jk'] || 'L', alamat: row['alamat'] || '-', telepon: row['no telepon'] || row['telepon'] || '-' });
                     });
-                    
-                    if(newRecords.length > 0) {
-                        jamaahData = [...jamaahData, ...newRecords];
-                        renderAllJamaahTables(); showToast(`Mengunggah ${newRecords.length} data ke server...`, 'info');
-                        if(API_URL) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'importJamaah', data: newRecords }) });
-                        showToast(`${newRecords.length} Data berhasil diimport!`, 'success');
-                    } else { showToast('Format tidak sesuai. Gunakan file Template!', 'error'); }
-                } catch (error) { console.error("Import error:", error); showToast('Gagal memproses file Excel', 'error'); } finally { e.target.value = ''; }
-            };
-            reader.readAsArrayBuffer(file); 
+                    if(newRecords.length > 0) { jamaahData = [...jamaahData, ...newRecords]; renderAllJamaahTables(); showToast(`Import ${newRecords.length} data...`, 'info'); if(API_URL) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'importJamaah', data: newRecords }) }); showToast('Sukses Import!', 'success'); } 
+                    else { showToast('Format tidak sesuai', 'error'); }
+                } catch (err) { showToast('Gagal proses', 'error'); } finally { e.target.value = ''; }
+            }; reader.readAsArrayBuffer(file); 
         }
 
-        // ================= LAPORAN KARU LOGIC (EXISTING) =================
+        // ================= LAPORAN KARU =================
         async function submitLaporan(e) {
             e.preventDefault();
             const newReport = {
                 id: Date.now(), 
+                posisi: document.getElementById('inpPosisi').value, // Mengambil isian baru
+                hari_tanggal: document.getElementById('inpHariTanggal').value,
+                waktu_laporan: document.getElementById('inpWaktuLaporan').value, // Pagi/Malam
                 rombongan: document.getElementById('inpRombongan').value,
                 regu: document.getElementById('inpRegu').value,
                 nama: document.getElementById('inpNama').value, 
                 porsi: document.getElementById('inpNoPorsi').value,
-                hari_tanggal: document.getElementById('inpHariTanggal').value,
-                waktu_laporan: document.getElementById('inpWaktuLaporan').value,
                 kehadiran: document.getElementById('inpKehadiran').value, 
-                kesehatan: document.getElementById('inpKesehatan').value,
+                kesehatan: document.getElementById('inpKesehatan').value, // Sehat/Sakit/Belum Diketahui
                 resiko: document.getElementById('inpResiko').value, 
                 catatan: document.getElementById('inpCatatan').value || '-',
                 tanggal_submit: new Date().toISOString(), 
@@ -958,126 +686,60 @@
             };
             reports.push(newReport); 
             document.getElementById('laporanForm').reset(); 
-            setDefaultDateForm();
-            handleRombonganChange(); 
-            showToast('Laporan berhasil dikirim!', 'success');
-
+            setDefaultDateForm(); handleRombonganChange(); 
+            showToast('Laporan terkirim!', 'success');
             if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'create', data: newReport }) });
         }
 
         function renderLaporanTable() {
             const tbody = document.getElementById('tableBody');
-            const search = document.getElementById('searchTable').value.toLowerCase();
-            const filterRom = document.getElementById('filterRombongan').value;
-            const filterReg = document.getElementById('filterRegu').value;
-            const filterKes = document.getElementById('filterKesehatan').value;
-            const sort = document.getElementById('sortTable').value;
-
-            let data = reports.filter(r => 
-                (r.nama.toLowerCase().includes(search) || r.porsi.toLowerCase().includes(search)) && 
-                (filterKes === '' || r.kesehatan === filterKes) &&
-                (filterRom === '' || r.rombongan == filterRom) &&
-                (filterReg === '' || r.regu == filterReg)
-            );
-            
-            data.sort((a, b) => sort === 'terbaru' ? new Date(b.tanggal_submit||0) - new Date(a.tanggal_submit||0) : 
-                               (sort === 'terlama' ? new Date(a.tanggal_submit||0) - new Date(b.tanggal_submit||0) : 
-                               (sort === 'nama_asc' ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama))));
+            const search = document.getElementById('searchTable').value.toLowerCase(), filterRom = document.getElementById('filterRombongan').value, filterReg = document.getElementById('filterRegu').value, filterKes = document.getElementById('filterKesehatan').value, sort = document.getElementById('sortTable').value;
+            let data = reports.filter(r => (r.nama.toLowerCase().includes(search) || r.porsi.toLowerCase().includes(search)) && (filterKes === '' || r.kesehatan === filterKes) && (filterRom === '' || r.rombongan == filterRom) && (filterReg === '' || r.regu == filterReg));
+            data.sort((a, b) => sort === 'terbaru' ? new Date(b.tanggal_submit||0) - new Date(a.tanggal_submit||0) : (sort === 'terlama' ? new Date(a.tanggal_submit||0) - new Date(b.tanggal_submit||0) : (sort === 'nama_asc' ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama))));
 
             tbody.innerHTML = data.length === 0 ? '' : data.map(r => {
-                let keHadirClass = 'bg-blue-100 text-blue-800';
-                const kh = (r.kehadiran||'').toLowerCase();
-                if(kh.includes('tersesat')) keHadirClass = 'bg-red-100 text-red-800';
-                else if(kh.includes('dirawat')) keHadirClass = 'bg-yellow-100 text-yellow-800';
-                else if(kh.includes('ziarah')) keHadirClass = 'bg-pink-100 text-pink-800';
-                else if(kh.includes('izin')) keHadirClass = 'bg-purple-100 text-purple-800';
+                let keHadirClass = 'bg-blue-100 text-blue-800'; const kh = (r.kehadiran||'').toLowerCase();
+                if(kh.includes('tersesat')) keHadirClass = 'bg-red-100 text-red-800'; else if(kh.includes('dirawat')) keHadirClass = 'bg-yellow-100 text-yellow-800'; else if(kh.includes('ziarah')) keHadirClass = 'bg-pink-100 text-pink-800'; else if(kh.includes('izin')) keHadirClass = 'bg-purple-100 text-purple-800';
+                let kesClass = 'bg-green-100 text-green-800'; const ks = (r.kesehatan||'').toLowerCase();
+                if(ks.includes('sakit berat')) kesClass = 'bg-red-100 text-red-800'; else if(ks.includes('ringan')) kesClass = 'bg-yellow-100 text-yellow-800'; else if(ks.includes('belum diketahui')) kesClass = 'bg-gray-200 text-gray-700';
 
                 return `
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 py-3 md:px-6 md:py-4"><input type="checkbox" class="row-checkbox rounded" value="${r.id}" onchange="updateBulkUI()"></td>
-                    <td class="px-3 py-3 md:px-6 md:py-4">
-                        <div class="text-[10px] md:text-sm font-medium text-gray-900">${r.hari_tanggal || '-'}</div>
-                        <div class="text-[9px] md:text-xs font-semibold text-indigo-600">${r.waktu_laporan || '-'}</div>
-                    </td>
+                    <td class="px-3 py-3 md:px-6 md:py-4"><div class="text-[10px] md:text-sm font-medium text-gray-900">${r.hari_tanggal || '-'}</div><div class="text-[9px] md:text-xs font-semibold text-indigo-600">${r.waktu_laporan || '-'}</div></td>
+                    <td class="px-3 py-3 md:px-6 md:py-4 font-medium text-emerald-700">${r.posisi || '-'}</td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><div class="font-medium text-gray-800">Rom ${r.rombongan || '-'}</div><div class="text-[10px] md:text-xs text-gray-500">Regu ${r.regu || '-'}</div></td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><div class="font-medium whitespace-normal min-w-[120px] md:min-w-0">${r.nama}</div><div class="text-[10px] md:text-xs text-gray-500">Porsi: ${r.porsi}</div></td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><span class="px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold ${keHadirClass}">${r.kehadiran}</span></td>
-                    <td class="px-3 py-3 md:px-6 md:py-4"><span class="px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold ${r.kesehatan==='Sehat'?'bg-green-100 text-green-800':r.kesehatan==='Sakit Berat'?'bg-red-100 text-red-800':'bg-yellow-100 text-yellow-800'}">${r.kesehatan}</span></td>
+                    <td class="px-3 py-3 md:px-6 md:py-4"><span class="px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold ${kesClass}">${r.kesehatan}</span></td>
                     <td class="px-3 py-3 md:px-6 md:py-4">${(r.resiko||'').toLowerCase() !== 'tidak ada' ? `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold whitespace-nowrap">${r.resiko}</span>` : '-'}</td>
                     <td class="px-3 py-3 md:px-6 md:py-4 hidden md:table-cell max-w-xs truncate" title="${r.catatan}">${r.catatan}</td>
-                    <td class="px-3 py-3 md:px-6 md:py-4 text-center">
-                        <button onclick="deleteRow(${r.id})" class="text-red-500 px-1 md:px-2"><i class="fas fa-trash"></i></button>
-                    </td>
+                    <td class="px-3 py-3 md:px-6 md:py-4 text-center"><button onclick="deleteRow(${r.id})" class="text-red-500 px-1"><i class="fas fa-trash"></i></button></td>
                 </tr>`
             }).join('');
-            document.getElementById('emptyState').classList.toggle('hidden', data.length > 0);
-            updateBulkUI(); updateStatistics();
+            document.getElementById('emptyState').classList.toggle('hidden', data.length > 0); updateBulkUI(); updateStatistics();
         }
 
-        // Laporan Utils...
         function toggleCheckAll() { const chk = document.getElementById('checkAll').checked; document.querySelectorAll('.row-checkbox').forEach(b => b.checked = chk); updateBulkUI(); }
         function updateBulkUI() { const chk = document.querySelectorAll('.row-checkbox:checked').length; document.getElementById('bulkCount').innerText = chk; document.getElementById('btnBulkDelete').disabled = chk === 0; }
-        function bulkDelete() {
-            if(!confirm('Hapus terpilih?')) return;
-            const ids = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => parseInt(cb.value));
-            reports = reports.filter(r => !ids.includes(r.id)); renderLaporanTable(); showToast('Dihapus', 'info');
-            if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'bulkDelete', ids: ids }) });
-        }
-        function deleteRow(id) {
-            if(confirm('Hapus laporan?')) { reports = reports.filter(r => r.id !== id); renderLaporanTable(); showToast('Dihapus', 'info');
-            if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) }); }
-        }
+        function bulkDelete() { if(!confirm('Hapus?')) return; const ids = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => parseInt(cb.value)); reports = reports.filter(r => !ids.includes(r.id)); renderLaporanTable(); if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'bulkDelete', ids: ids }) }); }
+        function deleteRow(id) { if(confirm('Hapus?')) { reports = reports.filter(r => r.id !== id); renderLaporanTable(); if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) }); } }
 
-        // CHART STATS
         function updateStatistics() {
-            const sehat = reports.filter(r => r.kesehatan === 'Sehat').length;
-            const ringan = reports.filter(r => r.kesehatan === 'Sakit Ringan').length;
-            const berat = reports.filter(r => r.kesehatan === 'Sakit Berat').length;
-            
-            const hadir = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length;
-            const izin = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length;
-            const ziarah = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length;
-            const dirawat = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length;
-            const hilang = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
-            
+            const sehat = reports.filter(r => r.kesehatan === 'Sehat').length, ringan = reports.filter(r => r.kesehatan === 'Sakit Ringan').length, berat = reports.filter(r => r.kesehatan === 'Sakit Berat').length, belum = reports.filter(r => r.kesehatan === 'Belum diketahui').length;
+            const hadir = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izin = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarah = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, dirawat = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length, hilang = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
             const ristiCount = reports.filter(r => (r.resiko||'').toLowerCase() !== 'tidak ada').length;
             
-            document.getElementById('statPublicTotal').innerText = reports.length; 
-            document.getElementById('statPublicSehat').innerText = sehat; 
-            document.getElementById('statPublicSakit').innerText = ringan + berat; 
-            document.getElementById('statPublicResiko').innerText = ristiCount;
+            document.getElementById('statPublicTotal').innerText = reports.length; document.getElementById('statPublicSehat').innerText = sehat; document.getElementById('statPublicSakit').innerText = ringan + berat; document.getElementById('statPublicResiko').innerText = ristiCount;
+            if(document.getElementById('panitiaTotal')) { document.getElementById('panitiaTotal').innerText = reports.length; document.getElementById('panitiaSehat').innerText = sehat; document.getElementById('panitiaSakitRingan').innerText = ringan; document.getElementById('panitiaSakitBerat').innerText = berat; document.getElementById('panitiaTersesat').innerText = hilang; }
             
-            if(document.getElementById('panitiaTotal')) { 
-                document.getElementById('panitiaTotal').innerText = reports.length; 
-                document.getElementById('panitiaSehat').innerText = sehat; 
-                document.getElementById('panitiaSakitRingan').innerText = ringan; 
-                document.getElementById('panitiaSakitBerat').innerText = berat; 
-                document.getElementById('panitiaTersesat').innerText = hilang; 
-            }
-            
-            updateChart('publicPie', 'publicPieChart', 'pie', 
-                ['Sehat', 'Sakit Ringan', 'Sakit Berat'], [sehat, ringan, berat], ['#10b981', '#f59e0b', '#ef4444']);
-            updateChart('publicDonut', 'publicDonutChart', 'doughnut', 
-                ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadir, izin, ziarah, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
-            
-            updateChart('adminPie', 'adminPieChart', 'pie', 
-                ['Sehat', 'Sakit Ringan', 'Sakit Berat'], [sehat, ringan, berat], ['#10b981', '#f59e0b', '#ef4444']);
-            updateChart('adminDonut', 'adminDonutChart', 'doughnut', 
-                ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadir, izin, ziarah, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
+            updateChart('publicPie', 'publicPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehat, ringan, berat, belum], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
+            updateChart('publicDonut', 'publicDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadir, izin, ziarah, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
+            updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehat, ringan, berat, belum], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
+            updateChart('adminDonut', 'adminDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadir, izin, ziarah, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
         }
-
-        function updateChart(k, id, t, l, d, c) {
-            const ctx = document.getElementById(id); if (!ctx) return;
-            if (chartInstances[k]) { chartInstances[k].data.datasets[0].data = d; chartInstances[k].update(); } 
-            else { chartInstances[k] = new Chart(ctx, { type: t, data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 10} } } } } }); }
-        }
-
-        function showToast(msg, type='info') {
-            const toast = document.createElement('div'); toast.className = `${type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-gray-800')} text-white px-4 py-2 rounded shadow-lg transition-opacity duration-500 flex items-center space-x-2 text-sm`;
-            toast.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-info-circle'}"></i> <span>${msg}</span>`;
-            document.getElementById('toastContainer').appendChild(toast);
-            setTimeout(() => toast.classList.add('opacity-0'), 2500); setTimeout(() => toast.remove(), 3000);
-        }
+        function updateChart(k, id, t, l, d, c) { const ctx = document.getElementById(id); if (!ctx) return; if (chartInstances[k]) { chartInstances[k].data.datasets[0].data = d; chartInstances[k].update(); } else { chartInstances[k] = new Chart(ctx, { type: t, data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 10} } } } } }); } }
+        function showToast(msg, type='info') { const t = document.createElement('div'); t.className = `${type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-gray-800')} text-white px-4 py-2 rounded shadow-lg flex items-center text-sm`; t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-info-circle'} mr-2"></i> ${msg}`; document.getElementById('toastContainer').appendChild(t); setTimeout(() => t.remove(), 3000); }
     </script>
 </body>
 </html>
