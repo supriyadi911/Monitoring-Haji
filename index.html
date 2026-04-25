@@ -89,8 +89,9 @@
                     <button class="bg-primary hover:bg-secondary text-white px-5 py-2.5 md:px-6 md:py-3 rounded-lg font-medium shadow-md transition text-sm md:text-base" onclick="openLoginModal()">Mulai Gunakan</button>
                 </div>
                 <div class="md:w-1/2 flex justify-center">
-                    <div class="w-40 h-40 md:w-64 md:h-64 bg-emerald-50 rounded-full flex items-center justify-center">
-                        <i class="fas fa-users text-5xl md:text-6xl text-primary opacity-80"></i>
+                    <div class="flex flex-col items-center">
+                        <span class="text-xs md:text-sm font-bold text-gray-400 mb-3 uppercase tracking-widest">Dilaporkan oleh:</span>
+                        <img src="https://i.ibb.co.com/Kpn6JDVH/Hijau-Dan-Putih-Modern-ID-Card-KKN-Card.png" alt="Ilustrasi Kloter Haji" class="w-48 md:w-72 object-contain drop-shadow-xl hover:scale-105 transition-transform duration-300 rounded-xl">
                     </div>
                 </div>
             </div>
@@ -120,11 +121,11 @@
                     </div>
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
                         <div class="bg-orange-100 p-3 md:p-4 rounded-lg text-orange-600 mr-3 md:mr-4"><i class="fas fa-procedures text-lg md:text-xl"></i></div>
-                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Sakit</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="statPublicSakit">0</p></div>
+                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Sakit Ringan</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="statPublicSakitRingan">0</p></div>
                     </div>
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
                         <div class="bg-red-100 p-3 md:p-4 rounded-lg text-red-600 mr-3 md:mr-4"><i class="fas fa-exclamation-triangle text-lg md:text-xl"></i></div>
-                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Resiko Tinggi</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="statPublicResiko">0</p></div>
+                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Sakit Berat</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="statPublicSakitBerat">0</p></div>
                     </div>
                 </div>
             </div>
@@ -816,6 +817,9 @@
         }
 
         function updateStatistics() {
+            // Fungsi pembantu untuk memformat angka dan persentase
+            const formatPct = (val, total) => total > 0 ? `${val} (${Math.round((val/total)*100)}%)` : `${val} (0%)`;
+
             // --- Filter Beranda ---
             const dateBrnd = document.getElementById('filterStatDate_brnd') ? document.getElementById('filterStatDate_brnd').value : '';
             const timeBrnd = document.getElementById('filterStatTime_brnd') ? document.getElementById('filterStatTime_brnd').value : '';
@@ -823,14 +827,14 @@
             if (dateBrnd) repBrnd = repBrnd.filter(r => r.hari_tanggal === dateBrnd);
             if (timeBrnd) repBrnd = repBrnd.filter(r => (r.waktu_laporan || '').toLowerCase().includes(timeBrnd.toLowerCase()));
 
+            const totalBrnd = repBrnd.length;
             const sehatBrnd = repBrnd.filter(r => r.kesehatan === 'Sehat').length, ringanBrnd = repBrnd.filter(r => r.kesehatan === 'Sakit Ringan').length, beratBrnd = repBrnd.filter(r => r.kesehatan === 'Sakit Berat').length, belumBrnd = repBrnd.filter(r => r.kesehatan === 'Belum diketahui').length;
             const hadirBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izinBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarahBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, dirawatBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length, hilangBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
-            const ristiCountBrnd = repBrnd.filter(r => (r.resiko||'').toLowerCase() !== 'tidak ada').length;
             
-            if(document.getElementById('statPublicTotal')) document.getElementById('statPublicTotal').innerText = repBrnd.length; 
-            if(document.getElementById('statPublicSehat')) document.getElementById('statPublicSehat').innerText = sehatBrnd; 
-            if(document.getElementById('statPublicSakit')) document.getElementById('statPublicSakit').innerText = ringanBrnd + beratBrnd; 
-            if(document.getElementById('statPublicResiko')) document.getElementById('statPublicResiko').innerText = ristiCountBrnd;
+            if(document.getElementById('statPublicTotal')) document.getElementById('statPublicTotal').innerText = totalBrnd; 
+            if(document.getElementById('statPublicSehat')) document.getElementById('statPublicSehat').innerText = formatPct(sehatBrnd, totalBrnd); 
+            if(document.getElementById('statPublicSakitRingan')) document.getElementById('statPublicSakitRingan').innerText = formatPct(ringanBrnd, totalBrnd); 
+            if(document.getElementById('statPublicSakitBerat')) document.getElementById('statPublicSakitBerat').innerText = formatPct(beratBrnd, totalBrnd);
             
             updateChart('publicPie', 'publicPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehatBrnd, ringanBrnd, beratBrnd, belumBrnd], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
             updateChart('publicDonut', 'publicDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadirBrnd, izinBrnd, ziarahBrnd, dirawatBrnd, hilangBrnd], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
@@ -842,21 +846,55 @@
             if (dateAdm) repAdm = repAdm.filter(r => r.hari_tanggal === dateAdm);
             if (timeAdm) repAdm = repAdm.filter(r => (r.waktu_laporan || '').toLowerCase().includes(timeAdm.toLowerCase()));
 
+            const totalAdm = repAdm.length;
             const sehatAdm = repAdm.filter(r => r.kesehatan === 'Sehat').length, ringanAdm = repAdm.filter(r => r.kesehatan === 'Sakit Ringan').length, beratAdm = repAdm.filter(r => r.kesehatan === 'Sakit Berat').length, belumAdm = repAdm.filter(r => r.kesehatan === 'Belum diketahui').length;
             const hadirAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izinAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarahAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, dirawatAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length, hilangAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
             
             if(document.getElementById('panitiaTotal')) { 
-                document.getElementById('panitiaTotal').innerText = repAdm.length; 
-                document.getElementById('panitiaSehat').innerText = sehatAdm; 
-                document.getElementById('panitiaSakitRingan').innerText = ringanAdm; 
-                document.getElementById('panitiaSakitBerat').innerText = beratAdm; 
-                document.getElementById('panitiaTersesat').innerText = hilangAdm; 
+                document.getElementById('panitiaTotal').innerText = totalAdm; 
+                document.getElementById('panitiaSehat').innerText = formatPct(sehatAdm, totalAdm); 
+                document.getElementById('panitiaSakitRingan').innerText = formatPct(ringanAdm, totalAdm); 
+                document.getElementById('panitiaSakitBerat').innerText = formatPct(beratAdm, totalAdm); 
+                document.getElementById('panitiaTersesat').innerText = formatPct(hilangAdm, totalAdm); 
             }
             
             updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehatAdm, ringanAdm, beratAdm, belumAdm], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
             updateChart('adminDonut', 'adminDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadirAdm, izinAdm, ziarahAdm, dirawatAdm, hilangAdm], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
         }
-        function updateChart(k, id, t, l, d, c) { const ctx = document.getElementById(id); if (!ctx) return; if (chartInstances[k]) { chartInstances[k].data.datasets[0].data = d; chartInstances[k].update(); } else { chartInstances[k] = new Chart(ctx, { type: t, data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 10} } } } } }); } }
+
+        function updateChart(k, id, t, l, d, c) { 
+            const ctx = document.getElementById(id); 
+            if (!ctx) return; 
+            if (chartInstances[k]) { 
+                chartInstances[k].data.datasets[0].data = d; 
+                chartInstances[k].update(); 
+            } else { 
+                chartInstances[k] = new Chart(ctx, { 
+                    type: t, 
+                    data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, 
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        plugins: { 
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 10} } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) { label += ': '; }
+                                        let value = context.raw || 0;
+                                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        let percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                        return label + value + ' orang (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        } 
+                    } 
+                }); 
+            } 
+        }
+
         function showToast(msg, type='info') { const t = document.createElement('div'); t.className = `${type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-gray-800')} text-white px-4 py-2 rounded shadow-lg flex items-center text-sm`; t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-info-circle'} mr-2"></i> ${msg}`; document.getElementById('toastContainer').appendChild(t); setTimeout(() => t.remove(), 3000); }
     </script>
 </body>
