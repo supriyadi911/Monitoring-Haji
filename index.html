@@ -124,8 +124,8 @@
                         <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Sakit Ringan</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="statPublicSakitRingan">0</p></div>
                     </div>
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
-                        <div class="bg-red-100 p-3 md:p-4 rounded-lg text-red-600 mr-3 md:mr-4"><i class="fas fa-exclamation-triangle text-lg md:text-xl"></i></div>
-                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Sakit Berat</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="statPublicSakitBerat">0</p></div>
+                        <div class="bg-red-100 p-3 md:p-4 rounded-lg text-red-600 mr-3 md:mr-4"><i class="fas fa-hospital text-lg md:text-xl"></i></div>
+                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Dirawat di Klinik/RS</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="statPublicDirawat">0</p></div>
                     </div>
                 </div>
             </div>
@@ -246,12 +246,25 @@
                         <button onclick="resetStatFilter('adm')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-xs md:text-sm transition" title="Reset Filter"><i class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-4 md:mb-6">
-                    <div class="bg-white p-3 md:p-4 rounded-lg shadow border-l-4 border-blue-500"><p class="text-[10px] md:text-xs text-gray-500 uppercase font-semibold">Total Data</p><p class="text-lg md:text-2xl font-bold" id="panitiaTotal">0</p></div>
-                    <div class="bg-white p-3 md:p-4 rounded-lg shadow border-l-4 border-green-500"><p class="text-[10px] md:text-xs text-gray-500 uppercase font-semibold">Sehat</p><p class="text-lg md:text-2xl font-bold" id="panitiaSehat">0</p></div>
-                    <div class="bg-white p-3 md:p-4 rounded-lg shadow border-l-4 border-yellow-500"><p class="text-[10px] md:text-xs text-gray-500 uppercase font-semibold">Sakit Ringan</p><p class="text-lg md:text-2xl font-bold" id="panitiaSakitRingan">0</p></div>
-                    <div class="bg-white p-3 md:p-4 rounded-lg shadow border-l-4 border-red-500"><p class="text-[10px] md:text-xs text-gray-500 uppercase font-semibold">Sakit Berat</p><p class="text-lg md:text-2xl font-bold" id="panitiaSakitBerat">0</p></div>
-                    <div class="bg-white p-3 md:p-4 rounded-lg shadow border-l-4 border-purple-500"><p class="text-[10px] md:text-xs text-gray-500 uppercase font-semibold">Belum Kembali</p><p class="text-lg md:text-2xl font-bold" id="panitiaTersesat">0</p></div>
+                
+                <!-- Statistik Lengkap Admin -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+                    <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                        <div class="bg-blue-100 p-3 md:p-4 rounded-lg text-blue-600 mr-3 md:mr-4"><i class="fas fa-users text-lg md:text-xl"></i></div>
+                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Total Jemaah Dilapor</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="admStatTotal">0</p></div>
+                    </div>
+                    <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                        <div class="bg-green-100 p-3 md:p-4 rounded-lg text-green-600 mr-3 md:mr-4"><i class="fas fa-heartbeat text-lg md:text-xl"></i></div>
+                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Kondisi Sehat</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="admStatSehat">0</p></div>
+                    </div>
+                    <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                        <div class="bg-orange-100 p-3 md:p-4 rounded-lg text-orange-600 mr-3 md:mr-4"><i class="fas fa-procedures text-lg md:text-xl"></i></div>
+                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Sakit Ringan</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="admStatSakitRingan">0</p></div>
+                    </div>
+                    <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
+                        <div class="bg-red-100 p-3 md:p-4 rounded-lg text-red-600 mr-3 md:mr-4"><i class="fas fa-hospital text-lg md:text-xl"></i></div>
+                        <div><p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Dirawat di Klinik/RS</p><p class="text-lg md:text-2xl font-bold text-gray-800" id="admStatDirawat">0</p></div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
@@ -828,15 +841,21 @@
             if (timeBrnd) repBrnd = repBrnd.filter(r => (r.waktu_laporan || '').toLowerCase().includes(timeBrnd.toLowerCase()));
 
             const totalBrnd = repBrnd.length;
-            const sehatBrnd = repBrnd.filter(r => r.kesehatan === 'Sehat').length, ringanBrnd = repBrnd.filter(r => r.kesehatan === 'Sakit Ringan').length, beratBrnd = repBrnd.filter(r => r.kesehatan === 'Sakit Berat').length, belumBrnd = repBrnd.filter(r => r.kesehatan === 'Belum diketahui').length;
-            const hadirBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izinBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarahBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, dirawatBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length, hilangBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
+            const sehatBrnd = repBrnd.filter(r => r.kesehatan === 'Sehat').length;
+            const ringanBrnd = repBrnd.filter(r => r.kesehatan === 'Sakit Ringan').length;
+            const dirawatBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length;
+            
+            // Total khusus untuk persentase Kondisi Kesehatan di Beranda (Sehat + Sakit Ringan + Dirawat = 100%)
+            const totalKesBrnd = sehatBrnd + ringanBrnd + dirawatBrnd;
+
+            const hadirBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izinBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarahBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, hilangBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
             
             if(document.getElementById('statPublicTotal')) document.getElementById('statPublicTotal').innerText = totalBrnd; 
-            if(document.getElementById('statPublicSehat')) document.getElementById('statPublicSehat').innerText = formatPct(sehatBrnd, totalBrnd); 
-            if(document.getElementById('statPublicSakitRingan')) document.getElementById('statPublicSakitRingan').innerText = formatPct(ringanBrnd, totalBrnd); 
-            if(document.getElementById('statPublicSakitBerat')) document.getElementById('statPublicSakitBerat').innerText = formatPct(beratBrnd, totalBrnd);
+            if(document.getElementById('statPublicSehat')) document.getElementById('statPublicSehat').innerText = formatPct(sehatBrnd, totalKesBrnd); 
+            if(document.getElementById('statPublicSakitRingan')) document.getElementById('statPublicSakitRingan').innerText = formatPct(ringanBrnd, totalKesBrnd); 
+            if(document.getElementById('statPublicDirawat')) document.getElementById('statPublicDirawat').innerText = formatPct(dirawatBrnd, totalKesBrnd);
             
-            updateChart('publicPie', 'publicPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehatBrnd, ringanBrnd, beratBrnd, belumBrnd], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
+            updateChart('publicPie', 'publicPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Dirawat di Klinik/RS'], [sehatBrnd, ringanBrnd, dirawatBrnd], ['#10b981', '#f59e0b', '#ef4444']);
             updateChart('publicDonut', 'publicDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadirBrnd, izinBrnd, ziarahBrnd, dirawatBrnd, hilangBrnd], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
 
             // --- Filter Admin ---
@@ -847,18 +866,27 @@
             if (timeAdm) repAdm = repAdm.filter(r => (r.waktu_laporan || '').toLowerCase().includes(timeAdm.toLowerCase()));
 
             const totalAdm = repAdm.length;
-            const sehatAdm = repAdm.filter(r => r.kesehatan === 'Sehat').length, ringanAdm = repAdm.filter(r => r.kesehatan === 'Sakit Ringan').length, beratAdm = repAdm.filter(r => r.kesehatan === 'Sakit Berat').length, belumAdm = repAdm.filter(r => r.kesehatan === 'Belum diketahui').length;
-            const hadirAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izinAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarahAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, dirawatAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length, hilangAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
             
-            if(document.getElementById('panitiaTotal')) { 
-                document.getElementById('panitiaTotal').innerText = totalAdm; 
-                document.getElementById('panitiaSehat').innerText = formatPct(sehatAdm, totalAdm); 
-                document.getElementById('panitiaSakitRingan').innerText = formatPct(ringanAdm, totalAdm); 
-                document.getElementById('panitiaSakitBerat').innerText = formatPct(beratAdm, totalAdm); 
-                document.getElementById('panitiaTersesat').innerText = formatPct(hilangAdm, totalAdm); 
-            }
+            // Perhitungan Admin Lengkap
+            const sehatAdm = repAdm.filter(r => r.kesehatan === 'Sehat').length;
+            const ringanAdm = repAdm.filter(r => r.kesehatan === 'Sakit Ringan').length;
+            const dirawatAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length;
+
+            const totalKesAdm = sehatAdm + ringanAdm + dirawatAdm;
+
+            const hadirAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length;
+            const izinAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length;
+            const ziarahAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length;
+            const hilangAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
             
-            updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehatAdm, ringanAdm, beratAdm, belumAdm], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
+            // Set ke Elemen DOM Admin
+            if(document.getElementById('admStatTotal')) document.getElementById('admStatTotal').innerText = totalAdm; 
+            if(document.getElementById('admStatSehat')) document.getElementById('admStatSehat').innerText = formatPct(sehatAdm, totalKesAdm); 
+            if(document.getElementById('admStatSakitRingan')) document.getElementById('admStatSakitRingan').innerText = formatPct(ringanAdm, totalKesAdm); 
+            if(document.getElementById('admStatDirawat')) document.getElementById('admStatDirawat').innerText = formatPct(dirawatAdm, totalKesAdm);
+
+            // Update Grafik Admin (Tetap seperti aslinya)
+            updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Dirawat di Klinik/RS'], [sehatAdm, ringanAdm, dirawatAdm], ['#10b981', '#f59e0b', '#ef4444']);
             updateChart('adminDonut', 'adminDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadirAdm, izinAdm, ziarahAdm, dirawatAdm, hilangAdm], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
         }
 
