@@ -83,7 +83,8 @@
         <section id="page-landing" class="block animate-fade-in space-y-6 md:space-y-8">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-12 text-center flex flex-col md:flex-row items-center">
                 <div class="md:w-1/2 text-left mb-6 md:mb-0">
-                    <h1 class="text-2xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">Sistem Monitoring Terpadu Jemaah Haji Kloter JKG 12 Pelaksanaan Ibadah Haji 1447 H/2026 M</h1>
+                    <h1 class="text-2xl md:text-4xl font-bold text-gray-900 mb-2">Sistem Monitoring Terpadu Jemaah Haji</h1>
+                    <h2 class="text-lg md:text-xl font-semibold text-primary mb-3 md:mb-4">Kloter JKG 12 Pelaksanaan Ibadah Haji 1447 H/2026 M</h2>
                     <p class="text-sm md:text-lg text-gray-600 mb-5 md:mb-6">Membantu Panitia dan Ketua Regu (KARU) dalam melacak posisi, kehadiran, dan kondisi kesehatan jemaah secara real-time.</p>
                     <button class="bg-primary hover:bg-secondary text-white px-5 py-2.5 md:px-6 md:py-3 rounded-lg font-medium shadow-md transition text-sm md:text-base" onclick="openLoginModal()">Mulai Gunakan</button>
                 </div>
@@ -96,7 +97,18 @@
 
             <!-- Statistik Publik -->
             <div>
-                <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">Ringkasan Laporan Terkini</h2>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 md:mb-4 gap-3">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800">Ringkasan Laporan Terkini</h2>
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <input type="date" id="filterStatDate_brnd" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Tanggal Data Masuk">
+                        <select id="filterStatTime_brnd" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Waktu Laporan">
+                            <option value="">Semua Waktu</option>
+                            <option value="Pagi">Pagi (09.00)</option>
+                            <option value="Malam">Malam (21.00)</option>
+                        </select>
+                        <button onclick="resetStatFilter('brnd')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-xs md:text-sm transition" title="Reset Filter"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center">
                         <div class="bg-blue-100 p-3 md:p-4 rounded-lg text-blue-600 mr-3 md:mr-4"><i class="fas fa-users text-lg md:text-xl"></i></div>
@@ -221,8 +233,17 @@
         <!-- BAGIAN 3: DASHBOARD PANITIA -->
         <section id="page-panitiaDash" class="hidden space-y-6 md:space-y-8">
             <div>
-                <div class="flex justify-between items-center mb-3 md:mb-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 md:mb-4 gap-3">
                     <h2 class="text-xl md:text-2xl font-bold text-gray-800">Manajemen Data Laporan (KARU)</h2>
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <input type="date" id="filterStatDate_adm" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Tanggal Data Masuk">
+                        <select id="filterStatTime_adm" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Waktu Laporan">
+                            <option value="">Semua Waktu</option>
+                            <option value="Pagi">Pagi (09.00)</option>
+                            <option value="Malam">Malam (21.00)</option>
+                        </select>
+                        <button onclick="resetStatFilter('adm')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-xs md:text-sm transition" title="Reset Filter"><i class="fas fa-sync-alt"></i></button>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-4 md:mb-6">
                     <div class="bg-white p-3 md:p-4 rounded-lg shadow border-l-4 border-blue-500"><p class="text-[10px] md:text-xs text-gray-500 uppercase font-semibold">Total Data</p><p class="text-lg md:text-2xl font-bold" id="panitiaTotal">0</p></div>
@@ -396,6 +417,20 @@
         let chartInstances = { publicPie: null, publicDonut: null, adminPie: null, adminDonut: null };
         let autoRefreshInterval = null; 
 
+        // FORMAT TANGGAL YANG AKURAT AGAR TIDAK MUNDUR 1 HARI KARENA TIMEZONE
+        function formatDateToLocal(dateStr) {
+            if (!dateStr) return '-';
+            if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            return dateStr.toString().split('T')[0];
+        }
+
         window.onload = async () => {
             renderJamaahTableComponent('containerJamaahBeranda', 'brnd', true);
             renderJamaahTableComponent('containerJamaahAdmin', 'adm', false);
@@ -410,9 +445,14 @@
                 const response = await fetch(API_URL);
                 const res = await response.json();
                 if (res.status === 'success') {
-                    reports = res.data.map(item => ({ ...item, id: parseInt(item.id), tanggal_submit: item.tanggal_submit || item.tanggal || new Date().toISOString() }));
+                    reports = res.data.map(item => ({ 
+                        ...item, 
+                        id: parseInt(item.id), 
+                        hari_tanggal: formatDateToLocal(item.hari_tanggal), // Terapkan koreksi Timezone
+                        tanggal_submit: item.tanggal_submit || item.tanggal || new Date().toISOString() 
+                    }));
                     if (res.users) registeredUsers = res.users;
-                    if (res.jamaah) jamaahData = res.jamaah.map(j => ({ ...j, tgl_lahir: j.tgl_lahir ? j.tgl_lahir.toString().split('T')[0] : '-' }));
+                    if (res.jamaah) jamaahData = res.jamaah.map(j => ({ ...j, tgl_lahir: formatDateToLocal(j.tgl_lahir) })); // Terapkan koreksi Timezone
                     
                     updateStatistics(); populateRomReg(); renderLaporanTable(); renderAllJamaahTables();
                     updateConnectionStatus('success', 'Terhubung');
@@ -551,7 +591,6 @@
             
             if(!tbody) return;
 
-            // Sembunyikan tabel jika belum memilih lengkap
             if (!rom || !reg) {
                 if(container) container.classList.add('hidden');
                 return;
@@ -628,7 +667,7 @@
                 let data = jamaahData.filter(j => (j.nama||'').toLowerCase().includes(search) || (j.porsi||'').toString().includes(search) || (j.rombongan||'').toString().includes(search) || (j.regu||'').toString().includes(search));
                 data.sort((a, b) => sort === 'nama_asc' ? (a.nama||'').localeCompare(b.nama||'') : (sort === 'nama_desc' ? (b.nama||'').localeCompare(a.nama||'') : (a.regu||'').toString().localeCompare((b.regu||'').toString())));
                 const isPublic = prefix === 'brnd';
-                tbody.innerHTML = data.length === 0 ? `<tr><td colspan="${isPublic?9:10}" class="text-center py-6 text-gray-500">Kosong</td></tr>` : data.map((j) => `<tr class="hover:bg-gray-50"><td class="px-4 py-3">${j.rombongan||'-'}</td><td class="px-4 py-3">${j.regu||'-'}</td><td class="px-4 py-3">${j.no_urut||'-'}</td><td class="px-4 py-3">${j.porsi||'-'}</td><td class="px-4 py-3 font-medium">${j.nama||'-'}</td><td class="px-4 py-3">${(j.tgl_lahir||'').toString().split('T')[0]||'-'}</td><td class="px-4 py-3">${j.jk||'-'}</td><td class="px-4 py-3 truncate max-w-[150px]">${j.alamat||'-'}</td><td class="px-4 py-3">${j.telepon||'-'}</td>${!isPublic ? `<td class="px-4 py-3 text-center sticky right-0 bg-white/90 z-10"><button onclick="editJamaah(${j.id})" class="text-blue-500 px-1"><i class="fas fa-edit"></i></button><button onclick="deleteJamaah(${j.id})" class="text-red-500 px-1"><i class="fas fa-trash"></i></button></td>` : ''}</tr>`).join('');
+                tbody.innerHTML = data.length === 0 ? `<tr><td colspan="${isPublic?9:10}" class="text-center py-6 text-gray-500">Kosong</td></tr>` : data.map((j) => `<tr class="hover:bg-gray-50"><td class="px-4 py-3">${j.rombongan||'-'}</td><td class="px-4 py-3">${j.regu||'-'}</td><td class="px-4 py-3">${j.no_urut||'-'}</td><td class="px-4 py-3">${j.porsi||'-'}</td><td class="px-4 py-3 font-medium">${j.nama||'-'}</td><td class="px-4 py-3">${j.tgl_lahir||'-'}</td><td class="px-4 py-3">${j.jk||'-'}</td><td class="px-4 py-3 truncate max-w-[150px]">${j.alamat||'-'}</td><td class="px-4 py-3">${j.telepon||'-'}</td>${!isPublic ? `<td class="px-4 py-3 text-center sticky right-0 bg-white/90 z-10"><button onclick="editJamaah(${j.id})" class="text-blue-500 px-1"><i class="fas fa-edit"></i></button><button onclick="deleteJamaah(${j.id})" class="text-red-500 px-1"><i class="fas fa-trash"></i></button></td>` : ''}</tr>`).join('');
             });
             populateRomReg(); 
         }
@@ -639,7 +678,7 @@
                 const j = jamaahData.find(x => x.id === id);
                 if(j) {
                     ['jamId','jamRombongan','jamRegu','jamNoUrut','jamPorsi','jamNama','jamJk','jamAlamat','jamTelepon'].forEach(k => document.getElementById(k).value = j[k.replace('jam','').toLowerCase()] || '');
-                    document.getElementById('jamTglLahir').value = (j.tgl_lahir || '').toString().split('T')[0] || '';
+                    document.getElementById('jamTglLahir').value = j.tgl_lahir || '';
                     document.getElementById('titleModalJamaah').innerText = 'Edit Data';
                 }
             }
@@ -659,7 +698,7 @@
         function deleteJamaah(id) { if(!confirm('Hapus data?')) return; jamaahData = jamaahData.filter(j => j.id !== id); renderAllJamaahTables(); showToast('Dihapus', 'info'); if(API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteJamaah', id: id }) }); }
 
         function downloadTemplateJamaah() { XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), XLSX.utils.json_to_sheet([{ "Rombongan": "1", "Regu": "2", "Nomor Urut": "14", "Nomor Porsi": "100012345", "Nama Lengkap": "Budi Santoso", "Tanggal Lahir": "1970-01-01", "Jenis Kelamin": "L", "Alamat": "Jl. Merdeka No 1", "No Telepon": "08123456789" }]), "Template"), "Template_Import.xlsx"); }
-        function exportJamaahExcel() { if(jamaahData.length === 0) return showToast('Kosong', 'error'); XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), XLSX.utils.json_to_sheet(jamaahData.map(j => ({ "Rombongan": j.rombongan, "Regu": j.regu, "Nomor Urut": j.no_urut, "Nomor Porsi": j.porsi, "Nama Lengkap": j.nama, "Tanggal Lahir": (j.tgl_lahir || '').toString().split('T')[0], "Jenis Kelamin": j.jk, "Alamat": j.alamat, "No Telepon": j.telepon }))), "Data Jamaah"), "Data_Jamaah.xlsx"); }
+        function exportJamaahExcel() { if(jamaahData.length === 0) return showToast('Kosong', 'error'); XLSX.writeFile(XLSX.utils.book_append_sheet(XLSX.utils.book_new(), XLSX.utils.json_to_sheet(jamaahData.map(j => ({ "Rombongan": j.rombongan, "Regu": j.regu, "Nomor Urut": j.no_urut, "Nomor Porsi": j.porsi, "Nama Lengkap": j.nama, "Tanggal Lahir": j.tgl_lahir, "Jenis Kelamin": j.jk, "Alamat": j.alamat, "No Telepon": j.telepon }))), "Data Jamaah"), "Data_Jamaah.xlsx"); }
         function importJamaahExcel(e) {
             const file = e.target.files[0]; if(!file) return; showToast('Membaca file...', 'info');
             const reader = new FileReader();
@@ -671,7 +710,7 @@
                     json.forEach((rawRow, index) => {
                         const row = {}; for (let key in rawRow) { row[key.trim().toLowerCase()] = rawRow[key]; }
                         const n = row['nama lengkap'] || row['nama'] || '', p = row['nomor porsi'] || row['no porsi'] || row['porsi'] || '';
-                        if (n !== '' || p !== '') newRecords.push({ id: Date.now() + index, rombongan: row['rombongan'] || '-', regu: row['regu'] || '-', no_urut: row['nomor urut'] || row['no urut'] || '-', porsi: p || '-', nama: n || '-', tgl_lahir: (row['tanggal lahir'] || row['tgl lahir'] || '').toString().split('T')[0] || '-', jk: row['jenis kelamin'] || row['jk'] || 'L', alamat: row['alamat'] || '-', telepon: row['no telepon'] || row['telepon'] || '-' });
+                        if (n !== '' || p !== '') newRecords.push({ id: Date.now() + index, rombongan: row['rombongan'] || '-', regu: row['regu'] || '-', no_urut: row['nomor urut'] || row['no urut'] || '-', porsi: p || '-', nama: n || '-', tgl_lahir: formatDateToLocal(row['tanggal lahir'] || row['tgl lahir']), jk: row['jenis kelamin'] || row['jk'] || 'L', alamat: row['alamat'] || '-', telepon: row['no telepon'] || row['telepon'] || '-' });
                     });
                     if(newRecords.length > 0) { jamaahData = [...jamaahData, ...newRecords]; renderAllJamaahTables(); showToast(`Import ${newRecords.length} data...`, 'info'); if(API_URL) await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'importJamaah', data: newRecords }) }); showToast('Sukses Import!', 'success'); } 
                     else { showToast('Format tidak sesuai', 'error'); }
@@ -729,7 +768,6 @@
             showToast('Laporan regu berhasil dikirim!', 'success');
 
             if (API_URL) {
-                // Mengirim banyak data (bulkCreate) sekaligus ke Server
                 fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'bulkCreate', data: newReports }) })
                 .catch(() => showToast('Gagal sinkronisasi ke server', 'error'));
             }
@@ -771,18 +809,52 @@
         function bulkDelete() { if(!confirm('Hapus?')) return; const ids = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => parseInt(cb.value)); reports = reports.filter(r => !ids.includes(r.id)); renderLaporanTable(); if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'bulkDelete', ids: ids }) }); }
         function deleteRow(id) { if(confirm('Hapus?')) { reports = reports.filter(r => r.id !== id); renderLaporanTable(); if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) }); } }
 
+        function resetStatFilter(prefix) {
+            if(document.getElementById(`filterStatDate_${prefix}`)) document.getElementById(`filterStatDate_${prefix}`).value = '';
+            if(document.getElementById(`filterStatTime_${prefix}`)) document.getElementById(`filterStatTime_${prefix}`).value = '';
+            updateStatistics();
+        }
+
         function updateStatistics() {
-            const sehat = reports.filter(r => r.kesehatan === 'Sehat').length, ringan = reports.filter(r => r.kesehatan === 'Sakit Ringan').length, berat = reports.filter(r => r.kesehatan === 'Sakit Berat').length, belum = reports.filter(r => r.kesehatan === 'Belum diketahui').length;
-            const hadir = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izin = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarah = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, dirawat = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length, hilang = reports.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
-            const ristiCount = reports.filter(r => (r.resiko||'').toLowerCase() !== 'tidak ada').length;
+            // --- Filter Beranda ---
+            const dateBrnd = document.getElementById('filterStatDate_brnd') ? document.getElementById('filterStatDate_brnd').value : '';
+            const timeBrnd = document.getElementById('filterStatTime_brnd') ? document.getElementById('filterStatTime_brnd').value : '';
+            let repBrnd = reports;
+            if (dateBrnd) repBrnd = repBrnd.filter(r => r.hari_tanggal === dateBrnd);
+            if (timeBrnd) repBrnd = repBrnd.filter(r => (r.waktu_laporan || '').toLowerCase().includes(timeBrnd.toLowerCase()));
+
+            const sehatBrnd = repBrnd.filter(r => r.kesehatan === 'Sehat').length, ringanBrnd = repBrnd.filter(r => r.kesehatan === 'Sakit Ringan').length, beratBrnd = repBrnd.filter(r => r.kesehatan === 'Sakit Berat').length, belumBrnd = repBrnd.filter(r => r.kesehatan === 'Belum diketahui').length;
+            const hadirBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izinBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarahBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, dirawatBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length, hilangBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
+            const ristiCountBrnd = repBrnd.filter(r => (r.resiko||'').toLowerCase() !== 'tidak ada').length;
             
-            document.getElementById('statPublicTotal').innerText = reports.length; document.getElementById('statPublicSehat').innerText = sehat; document.getElementById('statPublicSakit').innerText = ringan + berat; document.getElementById('statPublicResiko').innerText = ristiCount;
-            if(document.getElementById('panitiaTotal')) { document.getElementById('panitiaTotal').innerText = reports.length; document.getElementById('panitiaSehat').innerText = sehat; document.getElementById('panitiaSakitRingan').innerText = ringan; document.getElementById('panitiaSakitBerat').innerText = berat; document.getElementById('panitiaTersesat').innerText = hilang; }
+            if(document.getElementById('statPublicTotal')) document.getElementById('statPublicTotal').innerText = repBrnd.length; 
+            if(document.getElementById('statPublicSehat')) document.getElementById('statPublicSehat').innerText = sehatBrnd; 
+            if(document.getElementById('statPublicSakit')) document.getElementById('statPublicSakit').innerText = ringanBrnd + beratBrnd; 
+            if(document.getElementById('statPublicResiko')) document.getElementById('statPublicResiko').innerText = ristiCountBrnd;
             
-            updateChart('publicPie', 'publicPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehat, ringan, berat, belum], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
-            updateChart('publicDonut', 'publicDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadir, izin, ziarah, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
-            updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehat, ringan, berat, belum], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
-            updateChart('adminDonut', 'adminDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadir, izin, ziarah, dirawat, hilang], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
+            updateChart('publicPie', 'publicPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehatBrnd, ringanBrnd, beratBrnd, belumBrnd], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
+            updateChart('publicDonut', 'publicDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadirBrnd, izinBrnd, ziarahBrnd, dirawatBrnd, hilangBrnd], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
+
+            // --- Filter Admin ---
+            const dateAdm = document.getElementById('filterStatDate_adm') ? document.getElementById('filterStatDate_adm').value : '';
+            const timeAdm = document.getElementById('filterStatTime_adm') ? document.getElementById('filterStatTime_adm').value : '';
+            let repAdm = reports;
+            if (dateAdm) repAdm = repAdm.filter(r => r.hari_tanggal === dateAdm);
+            if (timeAdm) repAdm = repAdm.filter(r => (r.waktu_laporan || '').toLowerCase().includes(timeAdm.toLowerCase()));
+
+            const sehatAdm = repAdm.filter(r => r.kesehatan === 'Sehat').length, ringanAdm = repAdm.filter(r => r.kesehatan === 'Sakit Ringan').length, beratAdm = repAdm.filter(r => r.kesehatan === 'Sakit Berat').length, belumAdm = repAdm.filter(r => r.kesehatan === 'Belum diketahui').length;
+            const hadirAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izinAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarahAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, dirawatAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length, hilangAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
+            
+            if(document.getElementById('panitiaTotal')) { 
+                document.getElementById('panitiaTotal').innerText = repAdm.length; 
+                document.getElementById('panitiaSehat').innerText = sehatAdm; 
+                document.getElementById('panitiaSakitRingan').innerText = ringanAdm; 
+                document.getElementById('panitiaSakitBerat').innerText = beratAdm; 
+                document.getElementById('panitiaTersesat').innerText = hilangAdm; 
+            }
+            
+            updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Sakit Berat', 'Belum diketahui'], [sehatAdm, ringanAdm, beratAdm, belumAdm], ['#10b981', '#f59e0b', '#ef4444', '#9ca3af']);
+            updateChart('adminDonut', 'adminDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadirAdm, izinAdm, ziarahAdm, dirawatAdm, hilangAdm], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
         }
         function updateChart(k, id, t, l, d, c) { const ctx = document.getElementById(id); if (!ctx) return; if (chartInstances[k]) { chartInstances[k].data.datasets[0].data = d; chartInstances[k].update(); } else { chartInstances[k] = new Chart(ctx, { type: t, data: { labels: l, datasets: [{ data: d, backgroundColor: c }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 10} } } } } }); } }
         function showToast(msg, type='info') { const t = document.createElement('div'); t.className = `${type === 'success' ? 'bg-green-500' : (type === 'error' ? 'bg-red-500' : 'bg-gray-800')} text-white px-4 py-2 rounded shadow-lg flex items-center text-sm`; t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-info-circle'} mr-2"></i> ${msg}`; document.getElementById('toastContainer').appendChild(t); setTimeout(() => t.remove(), 3000); }
