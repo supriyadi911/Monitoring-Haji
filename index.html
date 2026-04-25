@@ -213,7 +213,6 @@
                                         <th class="px-3 py-2 border-b">Nama & Porsi</th>
                                         <th class="px-3 py-2 border-b">Kehadiran</th>
                                         <th class="px-3 py-2 border-b">Kesehatan</th>
-                                        <th class="px-3 py-2 border-b">Resiko</th>
                                         <th class="px-3 py-2 border-b">Catatan</th>
                                     </tr>
                                 </thead>
@@ -290,14 +289,19 @@
                                 <input type="text" id="searchTable" onkeyup="renderLaporanTable()" placeholder="Cari nama/porsi..." class="w-full pl-9 pr-4 py-2 border rounded-md text-sm focus:ring-primary outline-none">
                             </div>
                             <div class="flex gap-2 w-full md:w-auto flex-wrap">
-                                <select id="filterRombongan" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none"><option value="">Semua Rom</option></select>
+                                <input type="date" id="filterLaporanDate" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none text-gray-600" title="Filter Tanggal Laporan">
+                                <select id="filterLaporanTime" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none text-gray-600" title="Filter Waktu Laporan">
+                                    <option value="">Semua Waktu</option>
+                                    <option value="Pagi">Pagi</option>
+                                    <option value="Malam">Malam</option>
+                                </select>
+                                <select id="filterRombongan" onchange="handleFilterRombonganChange()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none"><option value="">Semua Rom</option></select>
                                 <select id="filterRegu" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none"><option value="">Semua Regu</option></select>
                                 <select id="filterKesehatan" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none">
                                     <option value="">Semua Kondisi</option>
                                     <option value="Sehat">Sehat</option>
                                     <option value="Sakit Ringan">Sakit Ringan</option>
-                                    <option value="Sakit Berat">Sakit Berat</option>
-                                    <option value="Belum diketahui">Belum diketahui</option>
+                                    <option value="Dirawat di Klinik/RS">Dirawat di Klinik/RS</option>
                                 </select>
                                 <select id="sortTable" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none">
                                     <option value="terbaru">Terbaru</option><option value="terlama">Terlama</option><option value="nama_asc">Nama A-Z</option><option value="nama_desc">Nama Z-A</option>
@@ -326,7 +330,6 @@
                         <div id="emptyState" class="hidden py-12 text-center text-gray-500"><i class="fas fa-folder-open text-4xl mb-3 text-gray-300"></i><p>Tidak ada data laporan ditemukan.</p></div>
                     </div>
                 </div>
-            </div>
 
             <!-- Tabel Data Jamaah (Admin) -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-6 md:mt-8">
@@ -580,10 +583,19 @@
         function populateRomReg() {
             const romSelect = document.getElementById('inpRombongan'), filterRom = document.getElementById('filterRombongan'), filterReg = document.getElementById('filterRegu');
             const uniqueRom = [...new Set(jamaahData.map(j => parseInt(j.rombongan)).filter(n => !isNaN(n)))].sort((a,b) => a - b);
-            const uniqueReg = [...new Set(jamaahData.map(j => parseInt(j.regu)).filter(n => !isNaN(n)))].sort((a,b) => a - b);
+            
             if(romSelect) { let romOptions = '<option value="">-- Pilih Rombongan --</option>'; uniqueRom.forEach(r => romOptions += `<option value="${r}">Rombongan ${r}</option>`); romSelect.innerHTML = romOptions; }
-            if(filterRom) { let fRomOptions = '<option value="">Semua Rom</option>'; uniqueRom.forEach(r => fRomOptions += `<option value="${r}">Rom ${r}</option>`); filterRom.innerHTML = fRomOptions; }
-            if(filterReg) { let fRegOptions = '<option value="">Semua Regu</option>'; uniqueReg.forEach(r => fRegOptions += `<option value="${r}">Regu ${r}</option>`); filterReg.innerHTML = fRegOptions; }
+            
+            if(filterRom) { 
+                const currentRomFilter = filterRom.value;
+                let fRomOptions = '<option value="">Semua Rom</option>'; 
+                uniqueRom.forEach(r => fRomOptions += `<option value="${r}">Rom ${r}</option>`); 
+                filterRom.innerHTML = fRomOptions; 
+                filterRom.value = currentRomFilter; 
+            }
+            
+            // Atur dropdown Regu sesuai filter Rombongan yang aktif
+            handleFilterRombonganChange();
         }
 
         function handleRombonganChange() {
@@ -595,6 +607,34 @@
                 else { [...new Set(jamaahData.filter(j => j.rombongan == romVal).map(j => j.regu).filter(Boolean))].sort().forEach(r => regOptions += `<option value="${r}">Regu ${r}</option>`); }
             } else { regOptions = '<option value="">-- Pilih Rombongan Dulu --</option>'; }
             regSelect.innerHTML = regOptions; filterNamaByRomReg();
+        }
+
+        // FUNGSI BARU: Mengatur pilihan Regu di Tabel Admin berdasarkan Rombongan
+        function handleFilterRombonganChange() {
+            const romVal = document.getElementById('filterRombongan') ? document.getElementById('filterRombongan').value : '';
+            const filterReg = document.getElementById('filterRegu');
+            if(!filterReg) return;
+
+            const oldRegVal = filterReg.value;
+            let regOptions = '<option value="">Semua Regu</option>';
+            
+            if (romVal) {
+                const rom = parseInt(romVal);
+                if (!isNaN(rom)) { 
+                    for (let i = (rom*4)-3; i <= rom*4; i++) { 
+                        regOptions += `<option value="${i}">Regu ${i}</option>`; 
+                    } 
+                }
+            } else {
+                const uniqueReg = [...new Set(jamaahData.map(j => parseInt(j.regu)).filter(n => !isNaN(n)))].sort((a,b) => a - b);
+                uniqueReg.forEach(r => regOptions += `<option value="${r}">Regu ${r}</option>`);
+            }
+            filterReg.innerHTML = regOptions;
+            
+            // Pertahankan pilihan regu jika masih ada di dalam opsi baru, jika tidak reset
+            if(regOptions.includes(`value="${oldRegVal}"`)) filterReg.value = oldRegVal;
+            
+            renderLaporanTable();
         }
 
         function filterNamaByRomReg() {
@@ -615,7 +655,7 @@
             if(container) container.classList.remove('hidden');
 
             if (filteredJamaah.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-gray-500">Tidak ada jamaah di Regu ini. Periksa Data Induk.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-500">Tidak ada jamaah di Regu ini. Periksa Data Induk.</td></tr>';
             } else {
                 const sortedJamaah = [...filteredJamaah].sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
                 tbody.innerHTML = sortedJamaah.map((j, i) => `
@@ -627,27 +667,16 @@
                         </td>
                         <td class="px-3 py-2">
                             <select class="w-full min-w-[140px] border border-gray-300 rounded px-2 py-1.5 outline-none text-[10px] md:text-xs val-kehadiran focus:ring-primary focus:border-primary">
-                                <option value="Hadir ada di hotel/maktab">Hadir di hotel/maktab</option>
-                                <option value="Izin ke masjid/ibadah">Izin ke masjid/ibadah</option>
-                                <option value="Ziarah/wisata/belanja">Ziarah/wisata/belanja</option>
-                                <option value="Tersesat/belum kembali">Tersesat/belum kembali</option>
-                                <option value="Dirawat (klinik/RS)">Dirawat (klinik/RS)</option>
+                                <option value="Hadir di hotel/maktab">Hadir di hotel/maktab</option>
+                                <option value="Ke masjid/ibadah/ziarah">Ke masjid/ibadah/ziarah</option>
+                                <option value="Wisata belanja">Wisata belanja</option>
                             </select>
                         </td>
                         <td class="px-3 py-2">
                             <select class="w-full min-w-[110px] border border-gray-300 rounded px-2 py-1.5 outline-none text-[10px] md:text-xs val-kesehatan focus:ring-primary focus:border-primary">
                                 <option value="Sehat">Sehat</option>
                                 <option value="Sakit Ringan">Sakit Ringan</option>
-                                <option value="Sakit Berat">Sakit Berat</option>
-                                <option value="Belum diketahui">Belum diketahui</option>
-                            </select>
-                        </td>
-                        <td class="px-3 py-2">
-                            <select class="w-full min-w-[100px] border border-gray-300 rounded px-2 py-1.5 outline-none text-[10px] md:text-xs val-resiko focus:ring-primary focus:border-primary">
-                                <option value="Tidak ada">Tidak ada</option>
-                                <option value="Disabilitas">Disabilitas</option>
-                                <option value="Lansia">Lansia</option>
-                                <option value="Risti kesehatan">Risti kesehatan</option>
+                                <option value="Dirawat di Klinik/RS">Dirawat di Klinik/RS</option>
                             </select>
                         </td>
                         <td class="px-3 py-2">
@@ -769,7 +798,7 @@
                     porsi: row.getAttribute('data-porsi'),
                     kehadiran: row.querySelector('.val-kehadiran').value, 
                     kesehatan: row.querySelector('.val-kesehatan').value,
-                    resiko: row.querySelector('.val-resiko').value, 
+                    resiko: "Tidak ada", 
                     catatan: row.querySelector('.val-catatan').value || '-',
                     tanggal_submit: timestamp, 
                     pelapor: pelapor
@@ -791,15 +820,34 @@
 
         function renderLaporanTable() {
             const tbody = document.getElementById('tableBody');
-            const search = document.getElementById('searchTable').value.toLowerCase(), filterRom = document.getElementById('filterRombongan').value, filterReg = document.getElementById('filterRegu').value, filterKes = document.getElementById('filterKesehatan').value, sort = document.getElementById('sortTable').value;
-            let data = reports.filter(r => (r.nama.toLowerCase().includes(search) || r.porsi.toLowerCase().includes(search)) && (filterKes === '' || r.kesehatan === filterKes) && (filterRom === '' || r.rombongan == filterRom) && (filterReg === '' || r.regu == filterReg));
+            if (!tbody) return;
+            const search = document.getElementById('searchTable').value.toLowerCase();
+            const filterRom = document.getElementById('filterRombongan').value;
+            const filterReg = document.getElementById('filterRegu').value;
+            const filterKes = document.getElementById('filterKesehatan').value;
+            const filterDate = document.getElementById('filterLaporanDate') ? document.getElementById('filterLaporanDate').value : '';
+            const filterTime = document.getElementById('filterLaporanTime') ? document.getElementById('filterLaporanTime').value : '';
+            const sort = document.getElementById('sortTable').value;
+            
+            let data = reports.filter(r => 
+                (search === '' || r.nama.toLowerCase().includes(search) || r.porsi.toLowerCase().includes(search)) && 
+                (filterKes === '' || r.kesehatan === filterKes) && 
+                (filterRom === '' || r.rombongan == filterRom) && 
+                (filterReg === '' || r.regu == filterReg) &&
+                (filterDate === '' || r.hari_tanggal === filterDate) &&
+                (filterTime === '' || (r.waktu_laporan || '').toLowerCase().includes(filterTime.toLowerCase()))
+            );
+            
             data.sort((a, b) => sort === 'terbaru' ? new Date(b.tanggal_submit||0) - new Date(a.tanggal_submit||0) : (sort === 'terlama' ? new Date(a.tanggal_submit||0) - new Date(b.tanggal_submit||0) : (sort === 'nama_asc' ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama))));
 
             tbody.innerHTML = data.length === 0 ? '' : data.map(r => {
                 let keHadirClass = 'bg-blue-100 text-blue-800'; const kh = (r.kehadiran||'').toLowerCase();
-                if(kh.includes('tersesat')) keHadirClass = 'bg-red-100 text-red-800'; else if(kh.includes('dirawat')) keHadirClass = 'bg-yellow-100 text-yellow-800'; else if(kh.includes('ziarah')) keHadirClass = 'bg-pink-100 text-pink-800'; else if(kh.includes('izin')) keHadirClass = 'bg-purple-100 text-purple-800';
+                if(kh.includes('wisata') || kh.includes('belanja')) keHadirClass = 'bg-pink-100 text-pink-800'; 
+                else if(kh.includes('ibadah') || kh.includes('ziarah') || kh.includes('masjid')) keHadirClass = 'bg-purple-100 text-purple-800';
+                
                 let kesClass = 'bg-green-100 text-green-800'; const ks = (r.kesehatan||'').toLowerCase();
-                if(ks.includes('sakit berat')) kesClass = 'bg-red-100 text-red-800'; else if(ks.includes('ringan')) kesClass = 'bg-yellow-100 text-yellow-800'; else if(ks.includes('belum diketahui')) kesClass = 'bg-gray-200 text-gray-700';
+                if(ks.includes('dirawat')) kesClass = 'bg-red-100 text-red-800'; 
+                else if(ks.includes('ringan')) kesClass = 'bg-yellow-100 text-yellow-800';
 
                 return `
                 <tr class="hover:bg-gray-50">
@@ -843,12 +891,14 @@
             const totalBrnd = repBrnd.length;
             const sehatBrnd = repBrnd.filter(r => r.kesehatan === 'Sehat').length;
             const ringanBrnd = repBrnd.filter(r => r.kesehatan === 'Sakit Ringan').length;
-            const dirawatBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length;
+            const dirawatBrnd = repBrnd.filter(r => (r.kesehatan||'').toLowerCase().includes('dirawat')).length;
             
             // Total khusus untuk persentase Kondisi Kesehatan di Beranda (Sehat + Sakit Ringan + Dirawat = 100%)
             const totalKesBrnd = sehatBrnd + ringanBrnd + dirawatBrnd;
 
-            const hadirBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length, izinBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length, ziarahBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length, hilangBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
+            const hadirBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length;
+            const ibadahBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('ibadah') || (r.kehadiran||'').toLowerCase().includes('ziarah') || (r.kehadiran||'').toLowerCase().includes('masjid')).length;
+            const wisataBrnd = repBrnd.filter(r => (r.kehadiran||'').toLowerCase().includes('wisata') || (r.kehadiran||'').toLowerCase().includes('belanja')).length;
             
             if(document.getElementById('statPublicTotal')) document.getElementById('statPublicTotal').innerText = totalBrnd; 
             if(document.getElementById('statPublicSehat')) document.getElementById('statPublicSehat').innerText = formatPct(sehatBrnd, totalKesBrnd); 
@@ -856,7 +906,7 @@
             if(document.getElementById('statPublicDirawat')) document.getElementById('statPublicDirawat').innerText = formatPct(dirawatBrnd, totalKesBrnd);
             
             updateChart('publicPie', 'publicPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Dirawat di Klinik/RS'], [sehatBrnd, ringanBrnd, dirawatBrnd], ['#10b981', '#f59e0b', '#ef4444']);
-            updateChart('publicDonut', 'publicDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadirBrnd, izinBrnd, ziarahBrnd, dirawatBrnd, hilangBrnd], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
+            updateChart('publicDonut', 'publicDonutChart', 'doughnut', ['Hadir', 'Ibadah/Ziarah', 'Wisata Belanja'], [hadirBrnd, ibadahBrnd, wisataBrnd], ['#3b82f6', '#8b5cf6', '#ec4899']);
 
             // --- Filter Admin ---
             const dateAdm = document.getElementById('filterStatDate_adm') ? document.getElementById('filterStatDate_adm').value : '';
@@ -870,14 +920,13 @@
             // Perhitungan Admin Lengkap
             const sehatAdm = repAdm.filter(r => r.kesehatan === 'Sehat').length;
             const ringanAdm = repAdm.filter(r => r.kesehatan === 'Sakit Ringan').length;
-            const dirawatAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('dirawat')).length;
+            const dirawatAdm = repAdm.filter(r => (r.kesehatan||'').toLowerCase().includes('dirawat')).length;
 
             const totalKesAdm = sehatAdm + ringanAdm + dirawatAdm;
 
             const hadirAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('hadir')).length;
-            const izinAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('izin')).length;
-            const ziarahAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('ziarah')).length;
-            const hilangAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('tersesat')).length;
+            const ibadahAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('ibadah') || (r.kehadiran||'').toLowerCase().includes('ziarah') || (r.kehadiran||'').toLowerCase().includes('masjid')).length;
+            const wisataAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('wisata') || (r.kehadiran||'').toLowerCase().includes('belanja')).length;
             
             // Set ke Elemen DOM Admin
             if(document.getElementById('admStatTotal')) document.getElementById('admStatTotal').innerText = totalAdm; 
@@ -887,7 +936,7 @@
 
             // Update Grafik Admin (Tetap seperti aslinya)
             updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Dirawat di Klinik/RS'], [sehatAdm, ringanAdm, dirawatAdm], ['#10b981', '#f59e0b', '#ef4444']);
-            updateChart('adminDonut', 'adminDonutChart', 'doughnut', ['Hadir', 'Izin', 'Ziarah/Wisata', 'Dirawat', 'Tersesat'], [hadirAdm, izinAdm, ziarahAdm, dirawatAdm, hilangAdm], ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#ef4444']);
+            updateChart('adminDonut', 'adminDonutChart', 'doughnut', ['Hadir', 'Ibadah/Ziarah', 'Wisata Belanja'], [hadirAdm, ibadahAdm, wisataAdm], ['#3b82f6', '#8b5cf6', '#ec4899']);
         }
 
         function updateChart(k, id, t, l, d, c) { 
