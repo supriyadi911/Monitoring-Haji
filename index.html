@@ -191,56 +191,25 @@
                             </select>
                         </div>
 
-                        <!-- Data Jamaah -->
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Nama Lengkap Jemaah *</label>
-                            <select id="inpNama" required onchange="autoFillPorsi()" class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
-                                <option value="">-- Pilih Regu Dulu --</option>
-                            </select>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">No. Porsi / KTP</label>
-                            <input type="text" id="inpNoPorsi" readonly class="w-full border border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none" placeholder="Otomatis terisi...">
-                        </div>
-                        
-                        <!-- Kondisi Kehadiran & Kesehatan -->
-                        <div class="space-y-2 md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Status Kehadiran *</label>
-                            <select id="inpKehadiran" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
-                                <option value="">-- Pilih Status --</option>
-                                <option value="Hadir ada di hotel/maktab">Hadir ada di hotel/maktab</option>
-                                <option value="Izin ke masjid/ibadah">Izin ke masjid/ibadah</option>
-                                <option value="Ziarah/wisata/belanja">Ziarah/wisata/belanja</option>
-                                <option value="Tersesat/belum kembali">Tersesat/belum kembali</option>
-                                <option value="Dirawat (klinik/RS)">Dirawat (klinik/RS)</option>
-                            </select>
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Kondisi Kesehatan Harian *</label>
-                            <select id="inpKesehatan" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
-                                <option value="">-- Pilih Kondisi --</option>
-                                <option value="Sehat">Sehat</option>
-                                <option value="Sakit Ringan">Sakit Ringan (Flu, Lelah)</option>
-                                <option value="Sakit Berat">Sakit Berat</option>
-                                <option value="Belum diketahui">Belum diketahui</option>
-                            </select>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Kategori Resiko Khusus *</label>
-                            <select id="inpResiko" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none">
-                                <option value="Tidak ada">Tidak ada</option>
-                                <option value="Disabilitas">Disabilitas</option>
-                                <option value="Lansia">Lansia</option>
-                                <option value="Risti kesehatan">Risti kesehatan</option>
-                            </select>
+                        <!-- Data Jamaah diganti menjadi Tabel Massal -->
+                        <div id="containerTabelAnggota" class="md:col-span-2 hidden overflow-x-auto border border-gray-200 rounded-lg shadow-sm mt-2">
+                            <table class="w-full text-xs md:text-sm text-left whitespace-nowrap">
+                                <thead class="bg-gray-100 text-gray-600 uppercase text-[10px] md:text-xs">
+                                    <tr>
+                                        <th class="px-3 py-2 border-b">No</th>
+                                        <th class="px-3 py-2 border-b">Nama & Porsi</th>
+                                        <th class="px-3 py-2 border-b">Kehadiran</th>
+                                        <th class="px-3 py-2 border-b">Kesehatan</th>
+                                        <th class="px-3 py-2 border-b">Resiko</th>
+                                        <th class="px-3 py-2 border-b">Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyAnggotaKaru" class="divide-y divide-gray-200 bg-white">
+                                    <!-- Diisi oleh Javascript -->
+                                </tbody>
+                            </table>
                         </div>
 
-                        <!-- Catatan Khusus -->
-                        <div class="space-y-2 md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700">Catatan Khusus KARU</label>
-                            <textarea id="inpCatatan" rows="3" class="w-full border border-gray-300 rounded-md px-3 md:px-4 py-2 focus:ring-primary outline-none text-sm md:text-base" placeholder="Tuliskan keterangan detail jika ada jemaah tersesat, dirawat, atau sakit..."></textarea>
-                        </div>
                     </div>
                     <div class="flex justify-end pt-4 border-t">
                         <button type="submit" class="w-full md:w-auto bg-primary hover:bg-secondary text-white px-6 py-2.5 rounded-md font-medium flex items-center justify-center transition shadow-sm"><i class="fas fa-paper-plane mr-2"></i> Kirim Laporan</button>
@@ -575,20 +544,65 @@
         }
 
         function filterNamaByRomReg() {
-            const rom = document.getElementById('inpRombongan').value, reg = document.getElementById('inpRegu').value, select = document.getElementById('inpNama');
-            if(!select) return;
-            let filteredJamaah = jamaahData;
-            if(rom) filteredJamaah = filteredJamaah.filter(j => j.rombongan == rom);
-            if(reg) filteredJamaah = filteredJamaah.filter(j => j.regu == reg);
-            let options = '<option value="">-- Pilih Jemaah --</option>';
-            if (!rom && !reg) { options = '<option value="">-- Pilih Regu Dulu --</option>'; } 
-            else { [...filteredJamaah].sort((a,b) => (a.nama||'').localeCompare(b.nama||'')).forEach(j => { options += `<option value="${j.nama}" data-porsi="${j.porsi}">${j.nama}</option>`; }); }
-            select.innerHTML = options; autoFillPorsi(); 
-        }
+            const rom = document.getElementById('inpRombongan').value;
+            const reg = document.getElementById('inpRegu').value;
+            const container = document.getElementById('containerTabelAnggota');
+            const tbody = document.getElementById('tbodyAnggotaKaru');
+            
+            if(!tbody) return;
 
-        function autoFillPorsi() {
-            const select = document.getElementById('inpNama'); if (select.selectedIndex === -1) return;
-            document.getElementById('inpNoPorsi').value = select.options[select.selectedIndex].getAttribute('data-porsi') || '';
+            // Sembunyikan tabel jika belum memilih lengkap
+            if (!rom || !reg) {
+                if(container) container.classList.add('hidden');
+                return;
+            }
+
+            let filteredJamaah = jamaahData.filter(j => j.rombongan == rom && j.regu == reg);
+            
+            if(container) container.classList.remove('hidden');
+
+            if (filteredJamaah.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-gray-500">Tidak ada jamaah di Regu ini. Periksa Data Induk.</td></tr>';
+            } else {
+                const sortedJamaah = [...filteredJamaah].sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
+                tbody.innerHTML = sortedJamaah.map((j, i) => `
+                    <tr class="row-anggota hover:bg-gray-50" data-nama="${j.nama}" data-porsi="${j.porsi}">
+                        <td class="px-3 py-2 text-center text-gray-500 font-medium">${i + 1}</td>
+                        <td class="px-3 py-2">
+                            <div class="font-medium text-gray-800 truncate max-w-[150px] md:max-w-none" title="${j.nama}">${j.nama}</div>
+                            <div class="text-[10px] text-gray-500">${j.porsi}</div>
+                        </td>
+                        <td class="px-3 py-2">
+                            <select class="w-full min-w-[140px] border border-gray-300 rounded px-2 py-1.5 outline-none text-[10px] md:text-xs val-kehadiran focus:ring-primary focus:border-primary">
+                                <option value="Hadir ada di hotel/maktab">Hadir di hotel/maktab</option>
+                                <option value="Izin ke masjid/ibadah">Izin ke masjid/ibadah</option>
+                                <option value="Ziarah/wisata/belanja">Ziarah/wisata/belanja</option>
+                                <option value="Tersesat/belum kembali">Tersesat/belum kembali</option>
+                                <option value="Dirawat (klinik/RS)">Dirawat (klinik/RS)</option>
+                            </select>
+                        </td>
+                        <td class="px-3 py-2">
+                            <select class="w-full min-w-[110px] border border-gray-300 rounded px-2 py-1.5 outline-none text-[10px] md:text-xs val-kesehatan focus:ring-primary focus:border-primary">
+                                <option value="Sehat">Sehat</option>
+                                <option value="Sakit Ringan">Sakit Ringan</option>
+                                <option value="Sakit Berat">Sakit Berat</option>
+                                <option value="Belum diketahui">Belum diketahui</option>
+                            </select>
+                        </td>
+                        <td class="px-3 py-2">
+                            <select class="w-full min-w-[100px] border border-gray-300 rounded px-2 py-1.5 outline-none text-[10px] md:text-xs val-resiko focus:ring-primary focus:border-primary">
+                                <option value="Tidak ada">Tidak ada</option>
+                                <option value="Disabilitas">Disabilitas</option>
+                                <option value="Lansia">Lansia</option>
+                                <option value="Risti kesehatan">Risti kesehatan</option>
+                            </select>
+                        </td>
+                        <td class="px-3 py-2">
+                            <input type="text" class="w-full min-w-[120px] border border-gray-300 rounded px-2 py-1.5 outline-none text-[10px] md:text-xs val-catatan focus:ring-primary focus:border-primary" placeholder="Opsional...">
+                        </td>
+                    </tr>
+                `).join('');
+            }
         }
 
         function renderJamaahTableComponent(containerId, prefix, isPublic = false) {
@@ -668,27 +682,59 @@
         // ================= LAPORAN KARU =================
         async function submitLaporan(e) {
             e.preventDefault();
-            const newReport = {
-                id: Date.now(), 
-                posisi: document.getElementById('inpPosisi').value, // Mengambil isian baru
-                hari_tanggal: document.getElementById('inpHariTanggal').value,
-                waktu_laporan: document.getElementById('inpWaktuLaporan').value, // Pagi/Malam
-                rombongan: document.getElementById('inpRombongan').value,
-                regu: document.getElementById('inpRegu').value,
-                nama: document.getElementById('inpNama').value, 
-                porsi: document.getElementById('inpNoPorsi').value,
-                kehadiran: document.getElementById('inpKehadiran').value, 
-                kesehatan: document.getElementById('inpKesehatan').value, // Sehat/Sakit/Belum Diketahui
-                resiko: document.getElementById('inpResiko').value, 
-                catatan: document.getElementById('inpCatatan').value || '-',
-                tanggal_submit: new Date().toISOString(), 
-                pelapor: currentUser ? currentUser.name : 'Unknown'
-            };
-            reports.push(newReport); 
+            const btn = e.target.querySelector('button[type="submit"]'); 
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Mengirim...'; 
+            btn.disabled = true;
+
+            const posisi = document.getElementById('inpPosisi').value;
+            const hari_tanggal = document.getElementById('inpHariTanggal').value;
+            const waktu_laporan = document.getElementById('inpWaktuLaporan').value;
+            const rombongan = document.getElementById('inpRombongan').value;
+            const regu = document.getElementById('inpRegu').value;
+            const pelapor = currentUser ? currentUser.name : 'Unknown';
+
+            const rows = document.querySelectorAll('.row-anggota');
+            if (rows.length === 0) {
+                showToast('Tidak ada jamaah untuk dilaporkan!', 'error');
+                btn.innerHTML = originalText; btn.disabled = false;
+                return;
+            }
+
+            let newReports = [];
+            const timestamp = new Date().toISOString();
+            
+            rows.forEach((row, index) => {
+                newReports.push({
+                    id: Date.now() + index, 
+                    posisi: posisi,
+                    hari_tanggal: hari_tanggal,
+                    waktu_laporan: waktu_laporan,
+                    rombongan: rombongan,
+                    regu: regu,
+                    nama: row.getAttribute('data-nama'), 
+                    porsi: row.getAttribute('data-porsi'),
+                    kehadiran: row.querySelector('.val-kehadiran').value, 
+                    kesehatan: row.querySelector('.val-kesehatan').value,
+                    resiko: row.querySelector('.val-resiko').value, 
+                    catatan: row.querySelector('.val-catatan').value || '-',
+                    tanggal_submit: timestamp, 
+                    pelapor: pelapor
+                });
+            });
+
+            reports = [...reports, ...newReports];
             document.getElementById('laporanForm').reset(); 
             setDefaultDateForm(); handleRombonganChange(); 
-            showToast('Laporan terkirim!', 'success');
-            if (API_URL) fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'create', data: newReport }) });
+            showToast('Laporan regu berhasil dikirim!', 'success');
+
+            if (API_URL) {
+                // Mengirim banyak data (bulkCreate) sekaligus ke Server
+                fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'bulkCreate', data: newReports }) })
+                .catch(() => showToast('Gagal sinkronisasi ke server', 'error'));
+            }
+
+            btn.innerHTML = originalText; btn.disabled = false;
         }
 
         function renderLaporanTable() {
