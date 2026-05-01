@@ -164,13 +164,11 @@
                     <!-- Peringatan Batas Waktu Pelaporan -->
                     <div id="karuTimeWarning" class="hidden bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-md shadow-sm animate-fade-in">
                         <div class="flex items-start">
-                            <i class="fas fa-user-clock text-red-500 text-lg mt-0.5"></i>
+                            <i class="fas fa-lock text-red-500 text-lg mt-0.5"></i>
                             <div class="ml-3">
-                                <h3 class="text-sm text-red-800 font-bold">Batas Waktu Pelaporan Ditutup</h3>
-                                <p class="text-xs text-red-600 mt-1 leading-relaxed">
-                                    Formulir pelaporan saat ini <strong>dikunci</strong>. Anda hanya dapat mengisi dan mengirim laporan pada jadwal berikut:<br>
-                                    &bull; Sesi Pagi: <strong>09.00 - 11.00</strong><br>
-                                    &bull; Sesi Malam: <strong>21.00 - 23.00</strong>
+                                <h3 class="text-sm text-red-800 font-bold">Akses Pelaporan Ditutup</h3>
+                                <p id="karuWarningText" class="text-xs text-red-600 mt-1 leading-relaxed">
+                                    <!-- Diisi secara dinamis oleh Javascript -->
                                 </p>
                             </div>
                         </div>
@@ -260,10 +258,33 @@
                         <input type="date" id="filterStatDate_adm" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Tanggal Data Masuk">
                         <select id="filterStatTime_adm" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Waktu Laporan">
                             <option value="">Semua Waktu</option>
-                            <option value="Pagi">Pagi (09.00)</option>
-                            <option value="Malam">Malam (21.00)</option>
+                            <option value="Pagi">Pagi</option>
+                            <option value="Malam">Malam</option>
                         </select>
                         <button onclick="resetStatFilter('adm')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-xs md:text-sm transition" title="Reset Filter"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+
+                <!-- KONTROL AKSES PELAPORAN KARU -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-4 md:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div class="flex items-start">
+                        <div class="bg-emerald-100 p-2.5 rounded-lg text-emerald-600 mr-3"><i class="fas fa-clock text-lg"></i></div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-800">Sistem Penjadwalan Otomatis</h3>
+                            <p class="text-[10px] md:text-xs text-gray-500 leading-tight mt-0.5">
+                                <strong>AKTIF:</strong> Buka khusus jam 09-11 & 21-23. <strong class="ml-1">NONAKTIF:</strong> Buka bebas 24 Jam.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center ml-12 sm:ml-0 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                        <label for="toggleReportingAccess" class="flex items-center cursor-pointer">
+                            <div class="relative">
+                                <input type="checkbox" id="toggleReportingAccess" class="sr-only toggle-checkbox" onchange="toggleReportingStatus()">
+                                <div class="block bg-gray-300 w-10 h-6 rounded-full toggle-block transition-colors"></div>
+                                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform toggle-dot shadow"></div>
+                            </div>
+                            <span class="ml-3 text-xs md:text-sm font-bold text-gray-700 uppercase tracking-wide" id="textReportingStatus">AKTIF</span>
+                        </label>
                     </div>
                 </div>
                 
@@ -469,28 +490,61 @@
         let currentUser = null; 
         let chartInstances = { publicPie: null, publicDonut: null, adminPie: null, adminDonut: null };
         let autoRefreshInterval = null; 
+        
+        // Status Akses Penjadwalan (Saklar Utama)
+        // Jika true: Waktu dibatasi (09-11 & 21-23). Jika false: Terbuka 24 Jam.
+        let isSchedulingActive = localStorage.getItem('hajiMon_scheduleActive') !== 'false';
 
-        // Fungsi Kunci Form Berdasarkan Waktu
-        function checkFormTimeLimit() {
+        // Fungsi Kunci Form Berdasarkan Status Toggle & Waktu
+        function checkFormStatus() {
+            const fieldset = document.getElementById('karuFormFieldset');
+            const warning = document.getElementById('karuTimeWarning');
+            const warningText = document.getElementById('karuWarningText');
+
+            // 1. Cek Waktu Saat Ini
             const now = new Date();
             const hour = now.getHours();
             const minute = now.getMinutes();
-            // Desimal waktu (contoh: 09.30 menjadi 9.5)
             const currentTime = hour + (minute / 60);
 
-            // Rentang Waktu: 09:00 - 11:00 ATAU 21:00 - 23:00
-            const isAllowed = (currentTime >= 9 && currentTime <= 11) || (currentTime >= 21 && currentTime <= 23);
+            // Rentang Waktu Diizinkan: 09:00 - 11:00 ATAU 21:00 - 23:00
+            const isAllowedTime = (currentTime >= 9 && currentTime <= 11) || (currentTime >= 21 && currentTime <= 23);
 
-            const fieldset = document.getElementById('karuFormFieldset');
-            const warning = document.getElementById('karuTimeWarning');
+            // 2. Kalkulasi Akhir
+            // Form terbuka JIKA: Penjadwalan dimatikan (buka 24 jam) ATAU Waktu saat ini sesuai jadwal.
+            const finalIsOpen = !isSchedulingActive || isAllowedTime;
 
-            if (isAllowed) {
+            if (finalIsOpen) {
                 if(fieldset) fieldset.disabled = false;
                 if(warning) warning.classList.add('hidden');
             } else {
                 if(fieldset) fieldset.disabled = true;
-                if(warning) warning.classList.remove('hidden');
+                if(warning) {
+                    warning.classList.remove('hidden');
+                    warningText.innerHTML = "Sistem penjadwalan saat ini sedang <strong>AKTIF</strong>. Anda hanya dapat mengisi laporan pada jadwal berikut:<br>&bull; Sesi Pagi: <strong>09.00 - 11.00</strong><br>&bull; Sesi Malam: <strong>21.00 - 23.00</strong>";
+                }
             }
+        }
+
+        // Fungsi untuk Admin mengubah status (Master Switch)
+        function toggleReportingStatus() {
+            const toggleEl = document.getElementById('toggleReportingAccess');
+            if(!toggleEl) return;
+            
+            isSchedulingActive = toggleEl.checked;
+            localStorage.setItem('hajiMon_scheduleActive', isSchedulingActive);
+            
+            const textStatus = document.getElementById('textReportingStatus');
+            if(isSchedulingActive) {
+                textStatus.innerText = 'AKTIF';
+                textStatus.className = 'ml-3 text-xs md:text-sm font-bold text-green-600 uppercase tracking-wide';
+            } else {
+                textStatus.innerText = 'NONAKTIF';
+                textStatus.className = 'ml-3 text-xs md:text-sm font-bold text-red-600 uppercase tracking-wide';
+            }
+            
+            checkFormStatus();
+            showToast(isSchedulingActive ? 'Sistem Penjadwalan AKTIF (Terjadwal)' : 'Sistem Penjadwalan NONAKTIF (Buka 24 Jam)', 'info');
         }
 
         // FORMAT TANGGAL YANG AKURAT AGAR TIDAK MUNDUR 1 HARI KARENA TIMEZONE
@@ -512,10 +566,19 @@
             renderJamaahTableComponent('containerJamaahAdmin', 'adm', false);
             setDefaultDateForm();
             
-            // Inisialisasi pembatasan waktu saat pertama kali dimuat
-            checkFormTimeLimit();
-            // Cek pembatasan waktu secara berkala setiap 1 menit
-            setInterval(checkFormTimeLimit, 60000);
+            // Inisialisasi UI Toggle Admin
+            const toggleEl = document.getElementById('toggleReportingAccess');
+            const textStatus = document.getElementById('textReportingStatus');
+            if(toggleEl) toggleEl.checked = isSchedulingActive;
+            if(textStatus) {
+                textStatus.innerText = isSchedulingActive ? 'AKTIF' : 'NONAKTIF';
+                textStatus.className = isSchedulingActive ? 'ml-3 text-xs md:text-sm font-bold text-green-600 uppercase tracking-wide' : 'ml-3 text-xs md:text-sm font-bold text-red-600 uppercase tracking-wide';
+            }
+
+            // Cek pembatasan form pertama kali
+            checkFormStatus();
+            // Cek ulang pembatasan form setiap 1 menit (agar bisa mengunci otomatis ketika lewat jam)
+            setInterval(checkFormStatus, 60000);
 
             await fetchDataFromAPI(false);
         };
