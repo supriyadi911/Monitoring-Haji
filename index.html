@@ -283,7 +283,7 @@
                                 <div class="block bg-gray-300 w-10 h-6 rounded-full toggle-block transition-colors"></div>
                                 <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform toggle-dot shadow"></div>
                             </div>
-                            <span class="ml-3 text-xs md:text-sm font-bold text-gray-700 uppercase tracking-wide" id="textReportingStatus">AKTIF</span>
+                            <span class="ml-3 text-xs md:text-sm font-bold text-gray-700 uppercase tracking-wide" id="textReportingStatus">MEMUAT...</span>
                         </label>
                     </div>
                 </div>
@@ -491,9 +491,19 @@
         let chartInstances = { publicPie: null, publicDonut: null, adminPie: null, adminDonut: null };
         let autoRefreshInterval = null; 
         
-        // Status Akses Penjadwalan (Saklar Utama)
-        // Jika true: Waktu dibatasi (09-11 & 21-23). Jika false: Terbuka 24 Jam.
-        let isSchedulingActive = localStorage.getItem('hajiMon_scheduleActive') !== 'false';
+        // Status Akses Penjadwalan (Nilai default true sebelum ditarik dari API)
+        let isSchedulingActive = true;
+
+        // Fungsi Memperbarui UI Toggle Button Admin
+        function updateToggleUI() {
+            const toggleEl = document.getElementById('toggleReportingAccess');
+            const textStatus = document.getElementById('textReportingStatus');
+            if(toggleEl) toggleEl.checked = isSchedulingActive;
+            if(textStatus) {
+                textStatus.innerText = isSchedulingActive ? 'AKTIF' : 'NONAKTIF';
+                textStatus.className = isSchedulingActive ? 'ml-3 text-xs md:text-sm font-bold text-green-600 uppercase tracking-wide' : 'ml-3 text-xs md:text-sm font-bold text-red-600 uppercase tracking-wide';
+            }
+        }
 
         // Fungsi Kunci Form Berdasarkan Status Toggle & Waktu
         function checkFormStatus() {
@@ -526,25 +536,64 @@
             }
         }
 
-        // Fungsi untuk Admin mengubah status (Master Switch)
-        function toggleReportingStatus() {
+        // Fungsi MENGAMBIL status pengaturan dari Google Server (Spreadsheet)
+        async function fetchSettingFromServer() {
+            if (!API_URL) return;
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getSetting' })
+                });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Update state dengan data dari server
+                    isSchedulingActive = result.isSchedulingActive;
+                    updateToggleUI();
+                    checkFormStatus();
+                }
+            } catch (error) {
+                console.error('Gagal mengambil pengaturan jadwal dari server', error);
+            }
+        }
+
+        // Fungsi untuk Admin MENGUBAH dan MENYIMPAN status ke Server
+        async function toggleReportingStatus() {
             const toggleEl = document.getElementById('toggleReportingAccess');
             if(!toggleEl) return;
             
+            const previousState = isSchedulingActive;
             isSchedulingActive = toggleEl.checked;
-            localStorage.setItem('hajiMon_scheduleActive', isSchedulingActive);
             
-            const textStatus = document.getElementById('textReportingStatus');
-            if(isSchedulingActive) {
-                textStatus.innerText = 'AKTIF';
-                textStatus.className = 'ml-3 text-xs md:text-sm font-bold text-green-600 uppercase tracking-wide';
-            } else {
-                textStatus.innerText = 'NONAKTIF';
-                textStatus.className = 'ml-3 text-xs md:text-sm font-bold text-red-600 uppercase tracking-wide';
-            }
-            
+            // Perbarui UI secara optimis
+            updateToggleUI();
             checkFormStatus();
-            showToast(isSchedulingActive ? 'Sistem Penjadwalan AKTIF (Terjadwal)' : 'Sistem Penjadwalan NONAKTIF (Buka 24 Jam)', 'info');
+
+            // Kirim perubahan ke Google Apps Script API
+            if (API_URL) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ 
+                            action: 'saveSetting', 
+                            isSchedulingActive: isSchedulingActive 
+                        })
+                    });
+                    const result = await response.json();
+                    
+                    if(result.status === 'success') {
+                        showToast(isSchedulingActive ? 'Penjadwalan AKTIF (Tersimpan di Cloud)' : 'Penjadwalan NONAKTIF (Tersimpan di Cloud)', 'success');
+                    } else {
+                        throw new Error('Respon gagal dari server');
+                    }
+                } catch(err) {
+                    showToast('Gagal menyimpan pengaturan ke server!', 'error');
+                    // Jika gagal kirim, kembalikan saklar ke posisi sebelumnya
+                    isSchedulingActive = previousState;
+                    updateToggleUI();
+                    checkFormStatus();
+                }
+            }
         }
 
         // FORMAT TANGGAL YANG AKURAT AGAR TIDAK MUNDUR 1 HARI KARENA TIMEZONE
@@ -566,17 +615,9 @@
             renderJamaahTableComponent('containerJamaahAdmin', 'adm', false);
             setDefaultDateForm();
             
-            // Inisialisasi UI Toggle Admin
-            const toggleEl = document.getElementById('toggleReportingAccess');
-            const textStatus = document.getElementById('textReportingStatus');
-            if(toggleEl) toggleEl.checked = isSchedulingActive;
-            if(textStatus) {
-                textStatus.innerText = isSchedulingActive ? 'AKTIF' : 'NONAKTIF';
-                textStatus.className = isSchedulingActive ? 'ml-3 text-xs md:text-sm font-bold text-green-600 uppercase tracking-wide' : 'ml-3 text-xs md:text-sm font-bold text-red-600 uppercase tracking-wide';
-            }
-
-            // Cek pembatasan form pertama kali
-            checkFormStatus();
+            // Cek status saat pertama kali load web
+            await fetchSettingFromServer();
+            
             // Cek ulang pembatasan form setiap 1 menit (agar bisa mengunci otomatis ketika lewat jam)
             setInterval(checkFormStatus, 60000);
 
@@ -618,7 +659,7 @@
 
         function toggleAutoRefresh() {
             if (document.getElementById('autoRefreshToggle').checked) {
-                autoRefreshInterval = setInterval(() => { fetchDataFromAPI(true); }, 10000);
+                autoRefreshInterval = setInterval(() => { fetchDataFromAPI(true); fetchSettingFromServer(); }, 10000);
                 showToast('Auto Refresh 10 detik diaktifkan', 'info');
             } else {
                 clearInterval(autoRefreshInterval);
@@ -702,7 +743,6 @@
                 filterRom.value = currentRomFilter; 
             }
             
-            // Atur dropdown Regu sesuai filter Rombongan yang aktif
             handleFilterRombonganChange();
         }
 
@@ -717,7 +757,6 @@
             regSelect.innerHTML = regOptions; filterNamaByRomReg();
         }
 
-        // FUNGSI BARU: Mengatur pilihan Regu di Tabel Admin berdasarkan Rombongan
         function handleFilterRombonganChange() {
             const romVal = document.getElementById('filterRombongan') ? document.getElementById('filterRombongan').value : '';
             const filterReg = document.getElementById('filterRegu');
@@ -739,7 +778,6 @@
             }
             filterReg.innerHTML = regOptions;
             
-            // Pertahankan pilihan regu jika masih ada di dalam opsi baru, jika tidak reset
             if(regOptions.includes(`value="${oldRegVal}"`)) filterReg.value = oldRegVal;
             
             renderLaporanTable();
@@ -966,7 +1004,6 @@
                     <td class="px-3 py-3 md:px-6 md:py-4"><div class="font-medium whitespace-normal min-w-[120px] md:min-w-0">${r.nama}</div><div class="text-[10px] md:text-xs text-gray-500">Porsi: ${r.porsi}</div></td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><span class="px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold ${keHadirClass}">${r.kehadiran}</span></td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><span class="px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold ${kesClass}">${r.kesehatan}</span></td>
-                    <td class="px-3 py-3 md:px-6 md:py-4">${(r.resiko||'').toLowerCase() !== 'tidak ada' ? `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold whitespace-nowrap">${r.resiko}</span>` : '-'}</td>
                     <td class="px-3 py-3 md:px-6 md:py-4 hidden md:table-cell max-w-xs truncate" title="${r.catatan}">${r.catatan}</td>
                     <td class="px-3 py-3 md:px-6 md:py-4 text-center"><button onclick="deleteRow(${r.id})" class="text-red-500 px-1"><i class="fas fa-trash"></i></button></td>
                 </tr>`
