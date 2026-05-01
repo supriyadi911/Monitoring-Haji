@@ -269,6 +269,23 @@
                     </div>
                 </div>
 
+                <!-- KARTU BARU: Status Laporan Regu -->
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-sm border border-gray-100 mb-4 md:mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3 md:gap-4 min-w-[200px]">
+                        <div class="bg-indigo-100 p-3 md:p-4 rounded-lg text-indigo-600"><i class="fas fa-clipboard-check text-lg md:text-xl"></i></div>
+                        <div>
+                            <p class="text-[10px] md:text-sm text-gray-500 font-medium leading-tight">Total Regu Terlapor</p>
+                            <p class="text-lg md:text-2xl font-bold text-gray-800" id="admStatTotalRegu">0</p>
+                        </div>
+                    </div>
+                    <div class="w-full md:flex-1 border-t md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-6">
+                        <p class="text-[10px] md:text-sm text-gray-500 font-medium mb-2">Daftar Regu (Sudah Lapor):</p>
+                        <div id="admStatDaftarRegu" class="flex flex-wrap gap-1.5 md:gap-2 max-h-24 overflow-y-auto pr-2">
+                            <span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-[10px] md:text-xs italic">Belum ada regu yang melapor</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow border border-gray-100 flex flex-col items-center">
                         <h3 class="text-base md:text-lg font-bold text-gray-800 mb-2 md:mb-4">Persentase Kondisi Kesehatan JKG 12</h3>
@@ -931,11 +948,40 @@
             const ibadahAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('ibadah') || (r.kehadiran||'').toLowerCase().includes('ziarah') || (r.kehadiran||'').toLowerCase().includes('masjid')).length;
             const wisataAdm = repAdm.filter(r => (r.kehadiran||'').toLowerCase().includes('wisata') || (r.kehadiran||'').toLowerCase().includes('belanja')).length;
             
+            // Logika Deteksi Regu yang Sudah Melapor
+            const reguSet = new Set();
+            const reguObjList = [];
+            repAdm.forEach(r => {
+                const romStr = r.rombongan || 0;
+                const regStr = r.regu || 0;
+                const key = `${romStr}-${regStr}`;
+                if (!reguSet.has(key)) {
+                    reguSet.add(key);
+                    reguObjList.push({ rom: parseInt(romStr) || 0, reg: parseInt(regStr) || 0 });
+                }
+            });
+            // Urutkan berdasarkan Rombongan lalu Regu
+            reguObjList.sort((a, b) => {
+                if (a.rom === b.rom) return a.reg - b.reg;
+                return a.rom - b.rom;
+            });
+            
             // Set ke Elemen DOM Admin
             if(document.getElementById('admStatTotal')) document.getElementById('admStatTotal').innerText = totalAdm; 
             if(document.getElementById('admStatSehat')) document.getElementById('admStatSehat').innerText = formatPct(sehatAdm, totalKesAdm); 
             if(document.getElementById('admStatSakitRingan')) document.getElementById('admStatSakitRingan').innerText = formatPct(ringanAdm, totalKesAdm); 
             if(document.getElementById('admStatDirawat')) document.getElementById('admStatDirawat').innerText = formatPct(dirawatAdm, totalKesAdm);
+
+            if(document.getElementById('admStatTotalRegu')) document.getElementById('admStatTotalRegu').innerText = reguObjList.length;
+            
+            const daftarReguContainer = document.getElementById('admStatDaftarRegu');
+            if(daftarReguContainer) {
+                if (reguObjList.length === 0) {
+                    daftarReguContainer.innerHTML = '<span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-[10px] md:text-xs italic">Belum ada regu yang melapor</span>';
+                } else {
+                    daftarReguContainer.innerHTML = reguObjList.map(item => `<span class="px-2 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded text-[10px] md:text-xs font-semibold shadow-sm">Rom ${item.rom} - Regu ${item.reg}</span>`).join('');
+                }
+            }
 
             // Update Grafik Admin (Tetap seperti aslinya)
             updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Dirawat di Klinik/RS'], [sehatAdm, ringanAdm, dirawatAdm], ['#10b981', '#f59e0b', '#ef4444']);
