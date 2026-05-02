@@ -84,7 +84,7 @@
                 <div class="md:w-1/2 text-left mb-6 md:mb-0">
                     <h1 class="text-2xl md:text-4xl font-bold text-gray-900 mb-2">Sistem Monitoring Terpadu Jemaah Haji</h1>
                     <h2 class="text-lg md:text-xl font-semibold text-primary mb-3 md:mb-4">Kloter JKG 12 Pelaksanaan Ibadah Haji 1447 H/2026 M</h2>
-                    <p class="text-sm md:text-lg text-gray-600 mb-5 md:mb-6">Membantu Panitia dan Ketua Regu (KARU) dalam melacak posisi, kehadiran, dan kondisi kesehatan jemaah secara real-time.</p>
+                    <p class="text-sm md:text-lg text-gray-600 mb-5 md:mb-6">Membantu Panitia dan Ketua Regu (KARU) dalam melacak kehadiran dan kondisi kesehatan jemaah secara real-time.</p>
                     <button class="bg-primary hover:bg-secondary text-white px-5 py-2.5 md:px-6 md:py-3 rounded-lg font-medium shadow-md transition text-sm md:text-base" onclick="openLoginModal()">Mulai Gunakan</button>
                 </div>
                 <div class="md:w-1/2 flex justify-center w-full mt-6 md:mt-0">
@@ -104,11 +104,7 @@
                     <h2 class="text-lg md:text-xl font-bold text-gray-800">Ringkasan Laporan Terkini JKG 12</h2>
                     <div class="flex flex-wrap gap-2 w-full md:w-auto">
                         <input type="date" id="filterStatDate_brnd" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Tanggal Data Masuk">
-                        <select id="filterStatTime_brnd" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Waktu Laporan">
-                            <option value="">Semua Waktu</option>
-                            <option value="Pagi">Pagi (09.00)</option>
-                            <option value="Malam">Malam (21.00)</option>
-                        </select>
+                        <!-- Select Filter Waktu dihilangkan karena hanya ada satu waktu (Pagi) -->
                         <button onclick="resetStatFilter('brnd')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-xs md:text-sm transition" title="Reset Filter"><i class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
@@ -178,23 +174,7 @@
                     <fieldset id="karuFormFieldset" class="min-w-0 border-0 p-0 m-0 space-y-4 md:space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             
-                            <!-- Posisi Saat Ini -->
-                            <div class="space-y-2 md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Posisi Saat Ini *</label>
-                                <select id="inpPosisi" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none disabled:bg-gray-100 disabled:text-gray-400">
-                                    <option value="">-- Pilih Posisi Jemaah --</option>
-                                    <option value="Lampung">Lampung</option>
-                                    <option value="Madinah">Madinah</option>
-                                    <option value="Mekkah">Mekkah</option>
-                                    <option value="Arafah">Arafah</option>
-                                    <option value="Muzdalifah">Muzdalifah</option>
-                                    <option value="Mina">Mina</option>
-                                    <option value="Jeddah">Jeddah</option>
-                                    <option value="Jakarta">Jakarta</option>
-                                </select>
-                            </div>
-
-                            <!-- Waktu & Tanggal -->
+                            <!-- Waktu & Tanggal (Posisi Dihapus) -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">Hari/Tanggal Laporan *</label>
                                 <input type="date" id="inpHariTanggal" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none text-gray-700 disabled:bg-gray-100 disabled:text-gray-400">
@@ -202,9 +182,7 @@
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">Waktu Laporan *</label>
                                 <select id="inpWaktuLaporan" required class="w-full border border-gray-300 rounded-md px-4 py-2 focus:ring-primary focus:border-primary outline-none disabled:bg-gray-100 disabled:text-gray-400">
-                                    <option value="">-- Pilih Waktu --</option>
-                                    <option value="Pagi (09.00)">Pagi (09.00)</option>
-                                    <option value="Malam (21.00)">Malam (21.00)</option>
+                                    <option value="Pagi (07.00 - 09.00)">Pagi (07.00 - 09.00 WS)</option>
                                 </select>
                             </div>
 
@@ -256,11 +234,7 @@
                     <h2 class="text-xl md:text-2xl font-bold text-gray-800">Manajemen Data Laporan (KARU)</h2>
                     <div class="flex flex-wrap gap-2 w-full md:w-auto">
                         <input type="date" id="filterStatDate_adm" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Tanggal Data Masuk">
-                        <select id="filterStatTime_adm" onchange="updateStatistics()" class="flex-1 md:w-auto border border-gray-300 rounded-md px-3 py-1.5 text-xs md:text-sm focus:ring-primary outline-none text-gray-600" title="Filter Waktu Laporan">
-                            <option value="">Semua Waktu</option>
-                            <option value="Pagi">Pagi</option>
-                            <option value="Malam">Malam</option>
-                        </select>
+                        <!-- Select Filter Waktu dihilangkan karena hanya ada satu waktu (Pagi) -->
                         <button onclick="resetStatFilter('adm')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-md text-xs md:text-sm transition" title="Reset Filter"><i class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
@@ -272,7 +246,7 @@
                         <div>
                             <h3 class="text-sm font-bold text-gray-800">Sistem Penjadwalan Otomatis</h3>
                             <p class="text-[10px] md:text-xs text-gray-500 leading-tight mt-0.5">
-                                <strong>AKTIF:</strong> Buka khusus jam 09-11 & 21-23. <strong class="ml-1">NONAKTIF:</strong> Buka bebas 24 Jam.
+                                <strong>AKTIF:</strong> Buka khusus jam 07.00 - 09.00 Waktu Arab Saudi. <strong class="ml-1">NONAKTIF:</strong> Buka bebas 24 Jam.
                             </p>
                         </div>
                     </div>
@@ -349,11 +323,7 @@
                             </div>
                             <div class="flex gap-2 w-full md:w-auto flex-wrap">
                                 <input type="date" id="filterLaporanDate" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none text-gray-600" title="Filter Tanggal Laporan">
-                                <select id="filterLaporanTime" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none text-gray-600" title="Filter Waktu Laporan">
-                                    <option value="">Semua Waktu</option>
-                                    <option value="Pagi">Pagi</option>
-                                    <option value="Malam">Malam</option>
-                                </select>
+                                <!-- Select Filter Waktu dihilangkan karena hanya ada satu waktu (Pagi) -->
                                 <select id="filterRombongan" onchange="handleFilterRombonganChange()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none"><option value="">Semua Rom</option></select>
                                 <select id="filterRegu" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none"><option value="">Semua Regu</option></select>
                                 <select id="filterKesehatan" onchange="renderLaporanTable()" class="flex-1 md:w-auto border rounded-md px-2 md:px-3 py-2 text-xs md:text-sm outline-none">
@@ -374,7 +344,7 @@
                                 <tr>
                                     <th class="px-3 py-3 md:px-6 md:py-4 w-10 sticky top-0 bg-gray-100 z-10 shadow-sm"><input type="checkbox" id="checkAll" onchange="toggleCheckAll()" class="rounded"></th>
                                     <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Tgl & Waktu</th>
-                                    <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Posisi</th>
+                                    <!-- Kolom Posisi Dihapus -->
                                     <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Rom/Regu</th>
                                     <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Jamaah</th>
                                     <th class="px-3 py-3 md:px-6 md:py-4 sticky top-0 bg-gray-100 z-10 shadow-sm">Kehadiran</th>
@@ -505,20 +475,29 @@
             }
         }
 
-        // Fungsi Kunci Form Berdasarkan Status Toggle & Waktu
+        // Fungsi Mendapatkan Waktu Arab Saudi (Waktu Setempat)
+        function getSaudiArabiaTime() {
+            const now = new Date();
+            // Offset Waktu Arab Saudi adalah UTC+3
+            // Mengubah waktu lokal perangkat menjadi UTC, lalu ditambah 3 jam
+            const saudiTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3600000 * 3));
+            return saudiTime;
+        }
+
+        // Fungsi Kunci Form Berdasarkan Status Toggle & Waktu Arab Saudi
         function checkFormStatus() {
             const fieldset = document.getElementById('karuFormFieldset');
             const warning = document.getElementById('karuTimeWarning');
             const warningText = document.getElementById('karuWarningText');
 
-            // 1. Cek Waktu Saat Ini
-            const now = new Date();
-            const hour = now.getHours();
-            const minute = now.getMinutes();
+            // 1. Cek Waktu Arab Saudi Saat Ini
+            const saudiTime = getSaudiArabiaTime();
+            const hour = saudiTime.getHours();
+            const minute = saudiTime.getMinutes();
             const currentTime = hour + (minute / 60);
 
-            // Rentang Waktu Diizinkan: 09:00 - 11:00 ATAU 21:00 - 23:00
-            const isAllowedTime = (currentTime >= 9 && currentTime <= 11) || (currentTime >= 21 && currentTime <= 23);
+            // Rentang Waktu Diizinkan HANYA PAGI: 07:00 - 09:00 Waktu Setempat (Arab Saudi)
+            const isAllowedTime = (currentTime >= 7 && currentTime <= 9);
 
             // 2. Kalkulasi Akhir
             // Form terbuka JIKA: Penjadwalan dimatikan (buka 24 jam) ATAU Waktu saat ini sesuai jadwal.
@@ -531,7 +510,7 @@
                 if(fieldset) fieldset.disabled = true;
                 if(warning) {
                     warning.classList.remove('hidden');
-                    warningText.innerHTML = "Sistem penjadwalan saat ini sedang <strong>AKTIF</strong>. Anda hanya dapat mengisi laporan pada jadwal berikut:<br>&bull; Sesi Pagi: <strong>09.00 - 11.00</strong><br>&bull; Sesi Malam: <strong>21.00 - 23.00</strong>";
+                    warningText.innerHTML = "Sistem penjadwalan saat ini sedang <strong>AKTIF</strong>. Anda hanya dapat mengisi laporan pada jadwal berikut:<br>&bull; Sesi Pagi: <strong>07.00 - 09.00 WS (Waktu Arab Saudi)</strong>";
                 }
             }
         }
@@ -915,7 +894,6 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Mengirim...'; 
             btn.disabled = true;
 
-            const posisi = document.getElementById('inpPosisi').value;
             const hari_tanggal = document.getElementById('inpHariTanggal').value;
             const waktu_laporan = document.getElementById('inpWaktuLaporan').value;
             const rombongan = document.getElementById('inpRombongan').value;
@@ -931,8 +909,7 @@
 
             let newReports = [];
             
-            // FUNGSI BARU: Memformat Waktu Lokal agar mudah dibaca di Spreadsheet
-            // Format Hasil: DD-MM-YYYY HH:mm:ss
+            // Format Hasil: DD-MM-YYYY HH:mm:ss (Berdasarkan Waktu Lokal Perangkat saat klik tombol)
             const now = new Date();
             const pad = (n) => n.toString().padStart(2, '0');
             const formattedTimestamp = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
@@ -940,7 +917,7 @@
             rows.forEach((row, index) => {
                 newReports.push({
                     id: Date.now() + index, 
-                    posisi: posisi,
+                    posisi: "Tidak diisi", // Dikirim sebagai "Tidak diisi" agar struktur tabel spreadsheet tetap aman
                     hari_tanggal: hari_tanggal,
                     waktu_laporan: waktu_laporan,
                     rombongan: rombongan,
@@ -951,7 +928,7 @@
                     kesehatan: row.querySelector('.val-kesehatan').value,
                     resiko: "Tidak ada", 
                     catatan: row.querySelector('.val-catatan').value || '-',
-                    tanggal_submit: formattedTimestamp, // Gunakan format baru di sini
+                    tanggal_submit: formattedTimestamp, 
                     pelapor: pelapor
                 });
             });
@@ -977,7 +954,8 @@
             const filterReg = document.getElementById('filterRegu').value;
             const filterKes = document.getElementById('filterKesehatan').value;
             const filterDate = document.getElementById('filterLaporanDate') ? document.getElementById('filterLaporanDate').value : '';
-            const filterTime = document.getElementById('filterLaporanTime') ? document.getElementById('filterLaporanTime').value : '';
+            // Filter Waktu Malam dihapus dari input, tapi fungsi ini dipertahankan utuh
+            
             const sort = document.getElementById('sortTable').value;
             
             let data = reports.filter(r => 
@@ -985,8 +963,7 @@
                 (filterKes === '' || r.kesehatan === filterKes) && 
                 (filterRom === '' || r.rombongan == filterRom) && 
                 (filterReg === '' || r.regu == filterReg) &&
-                (filterDate === '' || r.hari_tanggal === filterDate) &&
-                (filterTime === '' || (r.waktu_laporan || '').toLowerCase().includes(filterTime.toLowerCase()))
+                (filterDate === '' || r.hari_tanggal === filterDate)
             );
             
             data.sort((a, b) => sort === 'terbaru' ? new Date(b.tanggal_submit||0) - new Date(a.tanggal_submit||0) : (sort === 'terlama' ? new Date(a.tanggal_submit||0) - new Date(b.tanggal_submit||0) : (sort === 'nama_asc' ? a.nama.localeCompare(b.nama) : b.nama.localeCompare(a.nama))));
@@ -1004,7 +981,7 @@
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 py-3 md:px-6 md:py-4"><input type="checkbox" class="row-checkbox rounded" value="${r.id}" onchange="updateBulkUI()"></td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><div class="text-[10px] md:text-sm font-medium text-gray-900">${r.hari_tanggal || '-'}</div><div class="text-[9px] md:text-xs font-semibold text-indigo-600">${r.waktu_laporan || '-'}</div></td>
-                    <td class="px-3 py-3 md:px-6 md:py-4 font-medium text-emerald-700">${r.posisi || '-'}</td>
+                    <!-- Kolom Posisi sudah dihapus -->
                     <td class="px-3 py-3 md:px-6 md:py-4"><div class="font-medium text-gray-800">Rom ${r.rombongan || '-'}</div><div class="text-[10px] md:text-xs text-gray-500">Regu ${r.regu || '-'}</div></td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><div class="font-medium whitespace-normal min-w-[120px] md:min-w-0">${r.nama}</div><div class="text-[10px] md:text-xs text-gray-500">Porsi: ${r.porsi}</div></td>
                     <td class="px-3 py-3 md:px-6 md:py-4"><span class="px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold ${keHadirClass}">${r.kehadiran}</span></td>
@@ -1023,7 +1000,7 @@
 
         function resetStatFilter(prefix) {
             if(document.getElementById(`filterStatDate_${prefix}`)) document.getElementById(`filterStatDate_${prefix}`).value = '';
-            if(document.getElementById(`filterStatTime_${prefix}`)) document.getElementById(`filterStatTime_${prefix}`).value = '';
+            // Filter time dihapus karena hanya ada opsi pagi
             updateStatistics();
         }
 
@@ -1033,10 +1010,8 @@
 
             // --- Filter Beranda ---
             const dateBrnd = document.getElementById('filterStatDate_brnd') ? document.getElementById('filterStatDate_brnd').value : '';
-            const timeBrnd = document.getElementById('filterStatTime_brnd') ? document.getElementById('filterStatTime_brnd').value : '';
             let repBrnd = reports;
             if (dateBrnd) repBrnd = repBrnd.filter(r => r.hari_tanggal === dateBrnd);
-            if (timeBrnd) repBrnd = repBrnd.filter(r => (r.waktu_laporan || '').toLowerCase().includes(timeBrnd.toLowerCase()));
 
             const totalBrnd = repBrnd.length;
             const sehatBrnd = repBrnd.filter(r => r.kesehatan === 'Sehat').length;
@@ -1060,10 +1035,8 @@
 
             // --- Filter Admin ---
             const dateAdm = document.getElementById('filterStatDate_adm') ? document.getElementById('filterStatDate_adm').value : '';
-            const timeAdm = document.getElementById('filterStatTime_adm') ? document.getElementById('filterStatTime_adm').value : '';
             let repAdm = reports;
             if (dateAdm) repAdm = repAdm.filter(r => r.hari_tanggal === dateAdm);
-            if (timeAdm) repAdm = repAdm.filter(r => (r.waktu_laporan || '').toLowerCase().includes(timeAdm.toLowerCase()));
 
             const totalAdm = repAdm.length;
             
