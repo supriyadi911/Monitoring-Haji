@@ -240,7 +240,7 @@
                         <div>
                             <h3 class="text-sm font-bold text-gray-800">Sistem Penjadwalan Otomatis</h3>
                             <p class="text-[10px] md:text-xs text-gray-500 leading-tight mt-0.5">
-                                <strong>AKTIF:</strong> Buka khusus jam 07.00 - 09.00 Waktu Arab Saudi. <strong class="ml-1">NONAKTIF:</strong> Buka bebas 24 Jam.
+                                <strong>AKTIF:</strong> Buka khusus jam 07.00 - 09.00 (Waktu Perangkat). <strong class="ml-1">NONAKTIF:</strong> Buka bebas 24 Jam.
                             </p>
                         </div>
                     </div>
@@ -462,25 +462,23 @@
             }
         }
 
-        // Fungsi Mendapatkan Waktu Arab Saudi (Waktu Setempat)
-        function getSaudiArabiaTime() {
-            const now = new Date();
-            const saudiTime = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3600000 * 3));
-            return saudiTime;
-        }
-
-        // Fungsi Kunci Form Berdasarkan Status Toggle & Waktu Arab Saudi
+        // Fungsi Kunci Form Berdasarkan Status Toggle & Waktu Perangkat
         function checkFormStatus() {
             const fieldset = document.getElementById('karuFormFieldset');
             const warning = document.getElementById('karuTimeWarning');
             const warningText = document.getElementById('karuWarningText');
 
-            const saudiTime = getSaudiArabiaTime();
-            const hour = saudiTime.getHours();
-            const minute = saudiTime.getMinutes();
+            // 1. Cek Waktu Perangkat Saat Ini
+            const now = new Date();
+            const hour = now.getHours();
+            const minute = now.getMinutes();
             const currentTime = hour + (minute / 60);
 
+            // Rentang Waktu Diizinkan HANYA PAGI: 07:00 - 09:00 Waktu Perangkat
             const isAllowedTime = (currentTime >= 7 && currentTime <= 9);
+
+            // 2. Kalkulasi Akhir
+            // Form terbuka JIKA: Penjadwalan dimatikan (buka 24 jam) ATAU Waktu saat ini sesuai jadwal.
             const finalIsOpen = !isSchedulingActive || isAllowedTime;
 
             if (finalIsOpen) {
@@ -490,7 +488,7 @@
                 if(fieldset) fieldset.disabled = true;
                 if(warning) {
                     warning.classList.remove('hidden');
-                    warningText.innerHTML = "Sistem penjadwalan saat ini sedang <strong>AKTIF</strong>. Anda hanya dapat mengisi laporan pada jadwal berikut:<br>&bull; Sesi Pagi: <strong>07.00 - 09.00 WS (Waktu Arab Saudi)</strong>";
+                    warningText.innerHTML = "Sistem penjadwalan saat ini sedang <strong>AKTIF</strong>. Anda hanya dapat mengisi laporan pada jadwal berikut:<br>&bull; Sesi Pagi: <strong>07.00 - 09.00 (Waktu Perangkat Anda)</strong>";
                 }
             }
         }
@@ -620,19 +618,19 @@
         }
 
         function setDefaultDateForm() {
-            // Dapatkan waktu Arab Saudi saat ini
-            const saudiTime = getSaudiArabiaTime();
+            // Gunakan Waktu Perangkat Lokal
+            const now = new Date();
             
             // Format YYYY-MM-DD
-            const year = saudiTime.getFullYear();
-            const month = String(saudiTime.getMonth() + 1).padStart(2, '0');
-            const day = String(saudiTime.getDate()).padStart(2, '0');
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
             const todayStr = `${year}-${month}-${day}`;
             
             const dateInput = document.getElementById('inpHariTanggal');
             if (dateInput) {
                 dateInput.value = todayStr;
-                // Atur batas minimal agar tanggal sebelumnya tidak bisa dipilih
+                // Atur batas minimal agar tanggal sebelumnya tidak bisa dipilih (berdasarkan HP)
                 dateInput.min = todayStr;
             }
         }
