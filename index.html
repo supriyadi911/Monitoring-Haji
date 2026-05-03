@@ -620,8 +620,21 @@
         }
 
         function setDefaultDateForm() {
-            const now = new Date();
-            document.getElementById('inpHariTanggal').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            // Dapatkan waktu Arab Saudi saat ini
+            const saudiTime = getSaudiArabiaTime();
+            
+            // Format YYYY-MM-DD
+            const year = saudiTime.getFullYear();
+            const month = String(saudiTime.getMonth() + 1).padStart(2, '0');
+            const day = String(saudiTime.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+            
+            const dateInput = document.getElementById('inpHariTanggal');
+            if (dateInput) {
+                dateInput.value = todayStr;
+                // Atur batas minimal agar tanggal sebelumnya tidak bisa dipilih
+                dateInput.min = todayStr;
+            }
         }
 
         function switchPage(pageId) {
