@@ -916,18 +916,18 @@
             rows.forEach((row, index) => {
                 newReports.push({
                     id: Date.now() + index, 
-                    posisi: "Tidak diisi", // Dikirim default agar spreadsheet tidak error
-                    hari_tanggal: hari_tanggal,
-                    waktu_laporan: waktu_laporan,
-                    kbihu: kbihu, // Kolom baru ditambahkan
                     rombongan: rombongan,
                     regu: regu,
+                    kbihu: kbihu,
                     nama: row.getAttribute('data-nama'), 
                     porsi: row.getAttribute('data-porsi'),
-                    kehadiran: "Tidak diisi", // Kolom kehadiran diisi default karena formnya dihapus
+                    posisi: "Tidak diisi", 
+                    kehadiran: "Tidak diisi", 
                     kesehatan: row.querySelector('.val-kesehatan').value,
                     resiko: "Tidak ada", 
                     catatan: row.querySelector('.val-catatan').value || '-',
+                    hari_tanggal: hari_tanggal,
+                    waktu_laporan: waktu_laporan,
                     tanggal_submit: formattedTimestamp, 
                     pelapor: pelapor
                 });
