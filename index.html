@@ -308,10 +308,15 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-1 gap-4 md:gap-6 mb-4 md:mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
                     <div class="bg-white p-4 md:p-6 rounded-xl shadow border border-gray-100 flex flex-col items-center">
                         <h3 class="text-base md:text-lg font-bold text-gray-800 mb-2 md:mb-4">Persentase Kondisi Kesehatan JKG 12</h3>
-                        <div class="relative h-52 md:h-64 w-full md:w-1/2 flex justify-center"><canvas id="adminPieChart"></canvas></div>
+                        <div class="relative h-52 md:h-64 w-full flex justify-center"><canvas id="adminPieChart"></canvas></div>
+                    </div>
+                    <!-- KARTU BARU: PIE CHART KBIHU -->
+                    <div class="bg-white p-4 md:p-6 rounded-xl shadow border border-gray-100 flex flex-col items-center">
+                        <h3 class="text-base md:text-lg font-bold text-gray-800 mb-2 md:mb-4">Persentase Asal KBIHU JKG 12</h3>
+                        <div class="relative h-52 md:h-64 w-full flex justify-center"><canvas id="adminKbihuChart"></canvas></div>
                     </div>
                 </div>
 
@@ -466,7 +471,7 @@
         let registeredUsers = []; 
         let jamaahData = []; 
         let currentUser = null; 
-        let chartInstances = { publicPie: null, adminPie: null };
+        let chartInstances = { publicPie: null, adminPie: null, adminKbihuPie: null };
         let autoRefreshInterval = null; 
         
         // Status Akses Penjadwalan (Nilai default true sebelum ditarik dari API)
@@ -1073,7 +1078,23 @@
                 }
             }
 
+            // --- Hitung Data KBIHU untuk Chart ---
+            const kbihuCounts = {};
+            repAdm.forEach(r => {
+                const kb = r.kbihu || 'Tidak Diketahui';
+                kbihuCounts[kb] = (kbihuCounts[kb] || 0) + 1;
+            });
+            
+            // Urutkan label KBIHU secara alfabetis
+            const kbihuLabels = Object.keys(kbihuCounts).sort();
+            const kbihuData = kbihuLabels.map(label => kbihuCounts[label]);
+            
+            // Palet warna khusus KBIHU
+            const baseColors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f43f5e', '#f59e0b', '#10b981', '#14b8a6', '#06b6d4', '#6366f1', '#84cc16'];
+            const kbihuColors = kbihuLabels.map((_, i) => baseColors[i % baseColors.length]);
+
             updateChart('adminPie', 'adminPieChart', 'pie', ['Sehat', 'Sakit Ringan', 'Dirawat di Klinik/RS'], [sehatAdm, ringanAdm, dirawatAdm], ['#10b981', '#f59e0b', '#ef4444']);
+            updateChart('adminKbihuPie', 'adminKbihuChart', 'pie', kbihuLabels, kbihuData, kbihuColors);
         }
 
         function updateChart(k, id, t, l, d, c) { 
