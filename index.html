@@ -1081,7 +1081,7 @@
             // --- Hitung Data KBIHU untuk Chart ---
             const kbihuCounts = {};
             repAdm.forEach(r => {
-                const kb = r.kbihu || 'Tidak Diketahui';
+                const kb = r.kbihu || 'Lainnya';
                 kbihuCounts[kb] = (kbihuCounts[kb] || 0) + 1;
             });
             
